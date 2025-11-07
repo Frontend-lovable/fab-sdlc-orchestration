@@ -242,7 +242,7 @@ export const ConfluenceDashboard = () => {
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                   <Button 
                     variant="outline" 
-                    className="bg-red-600 text-white border border-red-600 text-sm flex items-center gap-2 hover:bg-black hover:text-white hover:border-black transition-colors"
+                    className="bg-primary text-white border border-primary text-sm flex items-center gap-2 hover:bg-black hover:text-white hover:border-black transition-colors"
                     style={{
                       fontSize: '14px',
                       fontWeight: 'normal'
@@ -256,7 +256,7 @@ export const ConfluenceDashboard = () => {
                   </Button>
                   <Button 
                     variant="outline" 
-                    className="bg-red-600 text-white border border-red-600 text-sm flex items-center gap-2 hover:bg-black hover:text-white hover:border-black transition-colors"
+                    className="bg-primary text-white border border-primary text-sm flex items-center gap-2 hover:bg-black hover:text-white hover:border-black transition-colors"
                     style={{
                       fontSize: '14px',
                       fontWeight: 'normal'
@@ -292,7 +292,7 @@ export const ConfluenceDashboard = () => {
                   <>
                     <div className="flex items-center gap-3 mb-4">
                       <Avatar className="h-8 w-8 flex-shrink-0">
-                        <AvatarFallback className="text-sm bg-red-600 text-white">
+                        <AvatarFallback className="text-sm bg-primary text-white">
                           {pageDetails.version.by.displayName.split(' ').map(n => n[0]).join('')}
                         </AvatarFallback>
                       </Avatar>
@@ -301,11 +301,11 @@ export const ConfluenceDashboard = () => {
                     
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-6 text-sm text-muted-foreground">
                       <div className="flex items-center gap-1">
-                        <Calendar className="w-4 h-4 flex-shrink-0 text-red-600" />
+                        <Calendar className="w-4 h-4 flex-shrink-0 text-primary" />
                         <span>{new Date(pageDetails.version.when).toLocaleString()}</span>
                       </div>
                       <Badge 
-                        className={`${getStatusBadge(pageDetails.status)} self-start ${pageDetails.status === 'Current' ? 'hover:bg-red-600' : ''}`}
+                        className={`${getStatusBadge(pageDetails.status)} self-start ${pageDetails.status === 'Current' ? 'hover:bg-primary' : ''}`}
                         style={{
                           backgroundColor: pageDetails.status === 'Current' ? '#0000FF' : undefined,
                           borderColor: pageDetails.status === 'Current' ? '#0000FF' : undefined,
