@@ -135,7 +135,7 @@ export const CreateProjectModal = ({ open, onOpenChange, projects, isLoadingProj
                 ? "text-white rounded-tl-lg"
                 : "text-muted-foreground hover:text-foreground"
             }`}
-            style={activeTab === "my-project" ? { backgroundColor: '#D61120', color: '#fff' } : { color: '#858585' }}
+            style={activeTab === "my-project" ? { backgroundColor: '#002b74', color: '#fff' } : { color: '#858585' }}
           >
             My Project
           </button>
@@ -147,7 +147,7 @@ export const CreateProjectModal = ({ open, onOpenChange, projects, isLoadingProj
                 ? "text-white rounded-tr-lg"
                 : "text-muted-foreground hover:text-foreground"
             }`}
-            style={activeTab === "new-project" ? { backgroundColor: '#D61120', color: '#fff' } : { color: '#858585' }}
+            style={activeTab === "new-project" ? { backgroundColor: '#002b74', color: '#fff' } : { color: '#858585' }}
           >
             New Project
           </button>
@@ -181,7 +181,7 @@ export const CreateProjectModal = ({ open, onOpenChange, projects, isLoadingProj
                     >
                       {isLoadingProjects ? (
                         <div className="flex items-center justify-center py-6">
-                          <div className="animate-spin rounded-full h-6 w-6 border-b-2" style={{ borderColor: '#D61120' }}></div>
+                          <div className="animate-spin rounded-full h-6 w-6 border-b-2" style={{ borderColor: '#002b74' }}></div>
                         </div>
                       ) : (
                         <>
@@ -249,7 +249,7 @@ export const CreateProjectModal = ({ open, onOpenChange, projects, isLoadingProj
                         <SelectContent className="bg-white">
                           {isLoadingTemplates ? (
                             <div className="flex items-center justify-center py-6">
-                              <Loader2 className="h-5 w-5 animate-spin" style={{ color: '#D61120' }} />
+                              <Loader2 className="h-5 w-5 animate-spin" style={{ color: '#002b74' }} />
                             </div>
                           ) : brdTemplates.length > 0 ? (
                             brdTemplates.map((template) => (
@@ -275,7 +275,7 @@ export const CreateProjectModal = ({ open, onOpenChange, projects, isLoadingProj
                     disabled={createProjectMutation.isPending}
                     className="text-sm"
                     style={{ 
-                      color: '#D61120',
+                      color: '#002b74',
                       fontWeight: 'normal'
                     }}
                     variant="ghost"
