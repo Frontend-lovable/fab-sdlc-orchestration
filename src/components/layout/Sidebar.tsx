@@ -15,6 +15,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import userAvatar from "@/assets/user-avatar.jpg";
+import deluxeLogo from "@/assets/deluxe-logo.svg";
 
 const navigationItems = [
   {
@@ -68,18 +69,18 @@ export const Sidebar = ({ showBackButton, onBack, collapsed, onToggleCollapse, c
   return (
     <div className={`${isMobile ? 'w-60' : (collapsed ? 'w-16' : 'w-60')} h-full bg-sidebar-bg border-r border-sidebar-border flex flex-col transition-all duration-300 overflow-hidden`}>
       {/* Header */}
-      <div className="py-0 border-b border-sidebar-border h-16 flex items-center justify-between flex-shrink-0" style={{ backgroundColor: 'rgba(230, 12, 35, 0.06)' }}>
+      <div className="py-0 border-b border-sidebar-border h-16 flex items-center justify-between flex-shrink-0" style={{ background: 'linear-gradient(105.18deg, #003da6 3.44%, #2669dc 97.48%)' }}>
         <Link 
           to="/"
           className="flex items-center gap-2 px-4 hover:opacity-80 transition-opacity"
         >
           <img 
-            src="https://www.deluxe.com/etc.clientlibs/deluxe/clientlibs/clientlib-commons/resources/images/sprites/view/svg/sprite.view.svg#deluxe_logo_2020" 
+            src={deluxeLogo} 
             alt="Deluxe"
             className="w-[65px]"
           />
           {(!collapsed || isMobile) && (
-            <div className="text-sm text-muted-foreground hidden sm:block">SDLC Orchestration</div>
+            <div className="text-sm text-white hidden sm:block">SDLC Orchestration</div>
           )}
         </Link>
         
