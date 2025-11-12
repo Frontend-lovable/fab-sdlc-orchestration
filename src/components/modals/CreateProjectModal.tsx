@@ -185,53 +185,29 @@ export const CreateProjectModal = ({ open, onOpenChange, projects, isLoadingProj
                         </div>
                       ) : (
                         <>
-                          {projects.length === 0 ? (
-                            <CommandGroup>
+                          <CommandEmpty>No project found.</CommandEmpty>
+                          <CommandGroup>
+                            {projects.map((project) => (
                               <CommandItem
-                                value="Payment Gateway"
+                                key={project.project_id}
+                                value={project.project_name}
                                 onSelect={() => {
-                                  setSelectedProject("payment-gateway");
+                                  setSelectedProject(project.project_id);
                                   setProjectOpen(false);
-                                  onProjectSelected?.("payment-gateway");
+                                  onProjectSelected?.(project.project_id);
                                   onOpenChange(false);
                                 }}
                               >
                                 <Check
                                   className={cn(
                                     "mr-2 h-4 w-4",
-                                    selectedProject === "payment-gateway" ? "opacity-100" : "opacity-0"
+                                    selectedProject === project.project_id ? "opacity-100" : "opacity-0"
                                   )}
                                 />
-                                Payment Gateway
+                                {project.project_name}
                               </CommandItem>
-                            </CommandGroup>
-                          ) : (
-                            <>
-                              <CommandEmpty>No project found.</CommandEmpty>
-                              <CommandGroup>
-                                {projects.map((project) => (
-                                  <CommandItem
-                                    key={project.project_id}
-                                    value={project.project_name}
-                                    onSelect={() => {
-                                      setSelectedProject(project.project_id);
-                                      setProjectOpen(false);
-                                      onProjectSelected?.(project.project_id);
-                                      onOpenChange(false);
-                                    }}
-                                  >
-                                    <Check
-                                      className={cn(
-                                        "mr-2 h-4 w-4",
-                                        selectedProject === project.project_id ? "opacity-100" : "opacity-0"
-                                      )}
-                                    />
-                                    {project.project_name}
-                                  </CommandItem>
-                                ))}
-                              </CommandGroup>
-                            </>
-                          )}
+                            ))}
+                          </CommandGroup>
                         </>
                       )}
                     </CommandList>
