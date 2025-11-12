@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
-import { ChevronRight, Check, ChevronsUpDown, Loader2 } from "lucide-react";
+import { ChevronRight, Check, ChevronsUpDown, Loader2, CreditCard } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -182,6 +182,28 @@ export const CreateProjectModal = ({ open, onOpenChange, projects, isLoadingProj
                       {isLoadingProjects ? (
                         <div className="flex items-center justify-center py-6">
                           <div className="animate-spin rounded-full h-6 w-6 border-b-2" style={{ borderColor: '#002b74' }}></div>
+                        </div>
+                      ) : projects.length === 0 ? (
+                        <div className="p-6 text-center space-y-4">
+                          <div className="flex justify-center">
+                            <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: '#002b74' }}>
+                              <CreditCard className="w-6 h-6 text-white" />
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <h3 className="font-semibold text-base" style={{ color: '#3B3B3B' }}>
+                              Payment Gateway
+                            </h3>
+                            <p className="text-sm text-muted-foreground">
+                              Upgrade to create projects
+                            </p>
+                          </div>
+                          <Button
+                            className="w-full text-white"
+                            style={{ backgroundColor: '#002b74' }}
+                          >
+                            Upgrade Now
+                          </Button>
                         </div>
                       ) : (
                         <>
