@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
-import { ChevronRight, Check, ChevronsUpDown, Loader2 } from "lucide-react";
+import { ChevronRight, Check, ChevronsUpDown, Loader2, CreditCard } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -214,6 +214,26 @@ export const CreateProjectModal = ({ open, onOpenChange, projects, isLoadingProj
                   </Command>
                 </PopoverContent>
               </Popover>
+              
+              {!isLoadingProjects && projects.length === 0 && (
+                <div className="mt-6 p-4 rounded-lg border border-border bg-background">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 rounded-full" style={{ backgroundColor: '#002b74' }}>
+                      <CreditCard className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-sm" style={{ color: '#3B3B3B' }}>Payment Gateway</h3>
+                      <p className="text-xs text-muted-foreground">Upgrade to create projects</p>
+                    </div>
+                  </div>
+                  <Button 
+                    className="w-full text-white text-sm"
+                    style={{ backgroundColor: '#002b74' }}
+                  >
+                    Upgrade Now
+                  </Button>
+                </div>
+              )}
             </div>
           ) : (
             <Form {...form}>
