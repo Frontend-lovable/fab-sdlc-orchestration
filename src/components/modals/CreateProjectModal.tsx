@@ -183,32 +183,36 @@ export const CreateProjectModal = ({ open, onOpenChange, projects, isLoadingProj
                         <div className="flex items-center justify-center py-6">
                           <div className="animate-spin rounded-full h-6 w-6 border-b-2" style={{ borderColor: '#002b74' }}></div>
                         </div>
-                      ) : projects.length === 0 ? (
-                        <div className="p-6 text-center space-y-4">
-                          <div className="flex justify-center">
-                            <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: '#002b74' }}>
-                              <CreditCard className="w-6 h-6 text-white" />
-                            </div>
-                          </div>
-                          <div className="space-y-2">
-                            <h3 className="font-semibold text-base" style={{ color: '#3B3B3B' }}>
-                              Payment Gateway
-                            </h3>
-                            <p className="text-sm text-muted-foreground">
-                              Upgrade to create projects
-                            </p>
-                          </div>
-                          <Button
-                            className="w-full text-white"
-                            style={{ backgroundColor: '#002b74' }}
-                          >
-                            Upgrade Now
-                          </Button>
-                        </div>
                       ) : (
                         <>
                           <CommandEmpty>No project found.</CommandEmpty>
                           <CommandGroup>
+                            <CommandItem
+                              value="payment-gateway"
+                              onSelect={() => {
+                                setSelectedProject("payment-gateway");
+                                setProjectOpen(false);
+                              }}
+                              className="flex items-center gap-3"
+                            >
+                              <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: '#002b74' }}>
+                                <CreditCard className="w-4 h-4 text-white" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="font-medium text-sm" style={{ color: '#3B3B3B' }}>
+                                  Payment Gateway
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                  Upgrade to unlock BRD Assistant
+                                </div>
+                              </div>
+                              <Check
+                                className={cn(
+                                  "h-4 w-4 shrink-0",
+                                  selectedProject === "payment-gateway" ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                            </CommandItem>
                             {projects.map((project) => (
                               <CommandItem
                                 key={project.project_id}
