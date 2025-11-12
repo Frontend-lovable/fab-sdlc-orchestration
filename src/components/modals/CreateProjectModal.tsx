@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
-import { ChevronRight, Check, ChevronsUpDown, Loader2, CreditCard } from "lucide-react";
+import { ChevronRight, Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -187,32 +187,6 @@ export const CreateProjectModal = ({ open, onOpenChange, projects, isLoadingProj
                         <>
                           <CommandEmpty>No project found.</CommandEmpty>
                           <CommandGroup>
-                            <CommandItem
-                              value="payment-gateway"
-                              onSelect={() => {
-                                setSelectedProject("payment-gateway");
-                                setProjectOpen(false);
-                              }}
-                              className="flex items-center gap-3"
-                            >
-                              <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: '#002b74' }}>
-                                <CreditCard className="w-4 h-4 text-white" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="font-medium text-sm" style={{ color: '#3B3B3B' }}>
-                                  Payment Gateway
-                                </div>
-                                <div className="text-xs text-muted-foreground">
-                                  Upgrade to unlock BRD Assistant
-                                </div>
-                              </div>
-                              <Check
-                                className={cn(
-                                  "h-4 w-4 shrink-0",
-                                  selectedProject === "payment-gateway" ? "opacity-100" : "opacity-0"
-                                )}
-                              />
-                            </CommandItem>
                             {projects.map((project) => (
                               <CommandItem
                                 key={project.project_id}
