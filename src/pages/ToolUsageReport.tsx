@@ -1,7 +1,6 @@
 import { useState, useMemo, useCallback } from "react";
 import { format, isWithinInterval } from "date-fns";
 import { CalendarIcon, ChevronRight, Download, FileText, ChevronLeft, FileSpreadsheet } from "lucide-react";
-import XLSX from "xlsx-js-style";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -487,6 +486,7 @@ const ToolUsageReport = () => {
   }, [filteredData]);
 
   const exportToExcel = useCallback(() => {
+    // For Excel, we create a simple HTML table that Excel can open
     const headers = [
       "User",
       "Role",
@@ -497,87 +497,37 @@ const ToolUsageReport = () => {
       "BCDs Generated",
       "BCD Avg Time",
     ];
+    const tableContent = `
+      <table>
+        <thead>
+          <tr>${headers.map((h) => `<th>${h}</th>`).join("")}</tr>
+        </thead>
+        <tbody>
+          ${filteredData
+            .map(
+              (row) => `
+            <tr>
+              <td>${row.user}</td>
+              <td>${row.role}</td>
+              <td>${row.project}</td>
+              <td>${format(new Date(row.date), "dd/MM/yyyy")}</td>
+              <td>${row.brdsGenerated}</td>
+              <td>${row.brdAvgTime} mins</td>
+              <td>${row.bcdsGenerated}</td>
+              <td>${row.bcdAvgTime} mins</td>
+            </tr>
+          `,
+            )
+            .join("")}
+        </tbody>
+      </table>
+    `;
 
-    // Header style: Bold, 16px font, dark blue background, white text
-    const headerStyle = {
-      font: { bold: true, sz: 16, color: { rgb: "FFFFFF" } },
-      fill: { fgColor: { rgb: "1F4E79" } },
-      alignment: { horizontal: "center", vertical: "center", wrapText: true },
-      border: {
-        top: { style: "thin", color: { rgb: "000000" } },
-        bottom: { style: "thin", color: { rgb: "000000" } },
-        left: { style: "thin", color: { rgb: "000000" } },
-        right: { style: "thin", color: { rgb: "000000" } },
-      },
-    };
-
-    // Data cell style: wrap text, borders
-    const cellStyle = {
-      alignment: { horizontal: "left", vertical: "center", wrapText: true },
-      border: {
-        top: { style: "thin", color: { rgb: "CCCCCC" } },
-        bottom: { style: "thin", color: { rgb: "CCCCCC" } },
-        left: { style: "thin", color: { rgb: "CCCCCC" } },
-        right: { style: "thin", color: { rgb: "CCCCCC" } },
-      },
-    };
-
-    // Create styled header row
-    const styledHeaders = headers.map((header) => ({
-      v: header,
-      t: "s",
-      s: headerStyle,
-    }));
-
-    // Prepare styled data rows
-    const styledDataRows = filteredData.map((row) => [
-      { v: row.user, t: "s", s: cellStyle },
-      { v: row.role, t: "s", s: cellStyle },
-      { v: row.project, t: "s", s: cellStyle },
-      { v: format(new Date(row.date), "dd/MM/yyyy"), t: "s", s: cellStyle },
-      { v: row.brdsGenerated, t: "n", s: { ...cellStyle, alignment: { ...cellStyle.alignment, horizontal: "center" } } },
-      { v: `${row.brdAvgTime} mins`, t: "s", s: { ...cellStyle, alignment: { ...cellStyle.alignment, horizontal: "center" } } },
-      { v: row.bcdsGenerated, t: "n", s: { ...cellStyle, alignment: { ...cellStyle.alignment, horizontal: "center" } } },
-      { v: `${row.bcdAvgTime} mins`, t: "s", s: { ...cellStyle, alignment: { ...cellStyle.alignment, horizontal: "center" } } },
-    ]);
-
-    // Create worksheet data with styled headers and data
-    const wsData = [styledHeaders, ...styledDataRows];
-
-    // Create worksheet
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
-
-    // Calculate column widths based on content (auto-fit)
-    const colWidths = headers.map((header, colIndex) => {
-      const maxContentLength = Math.max(
-        header.length,
-        ...filteredData.map((row) => {
-          const values = [
-            row.user,
-            row.role,
-            row.project,
-            format(new Date(row.date), "dd/MM/yyyy"),
-            String(row.brdsGenerated),
-            `${row.brdAvgTime} mins`,
-            String(row.bcdsGenerated),
-            `${row.bcdAvgTime} mins`,
-          ];
-          return String(values[colIndex]).length;
-        })
-      );
-      return { wch: Math.max(maxContentLength + 4, 18) };
-    });
-    ws["!cols"] = colWidths;
-
-    // Set row height for header
-    ws["!rows"] = [{ hpt: 30 }];
-
-    // Create workbook
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Tool Usage Report");
-
-    // Export file
-    XLSX.writeFile(wb, `tool_usage_report_${format(new Date(), "yyyy-MM-dd")}.xlsx`);
+    const blob = new Blob([tableContent], { type: "application/vnd.ms-excel" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `tool_usage_report_${format(new Date(), "yyyy-MM-dd")}.xls`;
+    link.click();
   }, [filteredData]);
 
   return (
