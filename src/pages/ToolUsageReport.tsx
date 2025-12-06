@@ -1,6 +1,6 @@
-import { useState, useMemo } from "react";
-import { format, isWithinInterval, parse } from "date-fns";
-import { CalendarIcon, ChevronRight, Download, FileText, ChevronLeft } from "lucide-react";
+import { useState, useMemo, useCallback } from "react";
+import { format, isWithinInterval } from "date-fns";
+import { CalendarIcon, ChevronRight, Download, FileText, ChevronLeft, FileSpreadsheet } from "lucide-react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -17,6 +17,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 
@@ -71,12 +77,31 @@ const generateDummyData = () => {
 
 const allData = generateDummyData();
 
+interface AppliedFilters {
+  fromDate: Date | undefined;
+  toDate: Date | undefined;
+  managers: string[];
+  projects: string[];
+  brdBcd: string[];
+}
+
 const ToolUsageReport = () => {
-  const [fromDate, setFromDate] = useState<Date | undefined>(undefined);
-  const [toDate, setToDate] = useState<Date | undefined>(undefined);
-  const [selectedManagers, setSelectedManagers] = useState<string[]>([]);
-  const [selectedProjects, setSelectedProjects] = useState<string[]>([]);
-  const [selectedBrdBcd, setSelectedBrdBcd] = useState<string[]>([]);
+  // Pending filter states (for selection before applying)
+  const [pendingFromDate, setPendingFromDate] = useState<Date | undefined>(undefined);
+  const [pendingToDate, setPendingToDate] = useState<Date | undefined>(undefined);
+  const [pendingManagers, setPendingManagers] = useState<string[]>([]);
+  const [pendingProjects, setPendingProjects] = useState<string[]>([]);
+  const [pendingBrdBcd, setPendingBrdBcd] = useState<string[]>([]);
+  
+  // Applied filter state (only updates on Apply button click)
+  const [appliedFilters, setAppliedFilters] = useState<AppliedFilters>({
+    fromDate: undefined,
+    toDate: undefined,
+    managers: [],
+    projects: [],
+    brdBcd: [],
+  });
+  
   const [currentPage, setCurrentPage] = useState(1);
   const [managerDropdownOpen, setManagerDropdownOpen] = useState(false);
   const [projectDropdownOpen, setProjectDropdownOpen] = useState(false);
@@ -89,43 +114,55 @@ const ToolUsageReport = () => {
   const uniqueProjects = [...new Set(allData.map((d) => d.project))];
   const brdBcdOptions = ["BRD", "BCD"];
 
-  const hasFiltersApplied = useMemo(() => {
+  // Check if any pending filters are selected
+  const hasPendingFilters = useMemo(() => {
     return (
-      fromDate !== undefined ||
-      toDate !== undefined ||
-      selectedManagers.length > 0 ||
-      selectedProjects.length > 0 ||
-      selectedBrdBcd.length > 0
+      pendingFromDate !== undefined ||
+      pendingToDate !== undefined ||
+      pendingManagers.length > 0 ||
+      pendingProjects.length > 0 ||
+      pendingBrdBcd.length > 0
     );
-  }, [fromDate, toDate, selectedManagers, selectedProjects, selectedBrdBcd]);
+  }, [pendingFromDate, pendingToDate, pendingManagers, pendingProjects, pendingBrdBcd]);
 
-  // Filter data
+  // Check if any filters are currently applied
+  const hasAppliedFilters = useMemo(() => {
+    return (
+      appliedFilters.fromDate !== undefined ||
+      appliedFilters.toDate !== undefined ||
+      appliedFilters.managers.length > 0 ||
+      appliedFilters.projects.length > 0 ||
+      appliedFilters.brdBcd.length > 0
+    );
+  }, [appliedFilters]);
+
+  // Filter data based on APPLIED filters only
   const filteredData = useMemo(() => {
     let result = [...allData];
 
     // Date range filter
-    if (fromDate && toDate) {
+    if (appliedFilters.fromDate && appliedFilters.toDate) {
       result = result.filter((item) => {
-        return isWithinInterval(item.startDate, { start: fromDate, end: toDate });
+        return isWithinInterval(item.startDate, { start: appliedFilters.fromDate!, end: appliedFilters.toDate! });
       });
-    } else if (fromDate) {
-      result = result.filter((item) => item.startDate >= fromDate);
-    } else if (toDate) {
-      result = result.filter((item) => item.startDate <= toDate);
+    } else if (appliedFilters.fromDate) {
+      result = result.filter((item) => item.startDate >= appliedFilters.fromDate!);
+    } else if (appliedFilters.toDate) {
+      result = result.filter((item) => item.startDate <= appliedFilters.toDate!);
     }
 
     // Manager filter
-    if (selectedManagers.length > 0) {
-      result = result.filter((item) => selectedManagers.includes(item.user));
+    if (appliedFilters.managers.length > 0) {
+      result = result.filter((item) => appliedFilters.managers.includes(item.user));
     }
 
     // Project filter
-    if (selectedProjects.length > 0) {
-      result = result.filter((item) => selectedProjects.includes(item.project));
+    if (appliedFilters.projects.length > 0) {
+      result = result.filter((item) => appliedFilters.projects.includes(item.project));
     }
 
     return result;
-  }, [fromDate, toDate, selectedManagers, selectedProjects]);
+  }, [appliedFilters]);
 
   // Pagination
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
@@ -134,17 +171,37 @@ const ToolUsageReport = () => {
     currentPage * itemsPerPage
   );
 
+  const handleApplyFilters = () => {
+    setAppliedFilters({
+      fromDate: pendingFromDate,
+      toDate: pendingToDate,
+      managers: pendingManagers,
+      projects: pendingProjects,
+      brdBcd: pendingBrdBcd,
+    });
+    setCurrentPage(1);
+  };
+
   const handleResetFilters = () => {
-    setFromDate(undefined);
-    setToDate(undefined);
-    setSelectedManagers([]);
-    setSelectedProjects([]);
-    setSelectedBrdBcd([]);
+    // Reset pending filters
+    setPendingFromDate(undefined);
+    setPendingToDate(undefined);
+    setPendingManagers([]);
+    setPendingProjects([]);
+    setPendingBrdBcd([]);
+    // Reset applied filters
+    setAppliedFilters({
+      fromDate: undefined,
+      toDate: undefined,
+      managers: [],
+      projects: [],
+      brdBcd: [],
+    });
     setCurrentPage(1);
   };
 
   const handleManagerToggle = (manager: string) => {
-    setSelectedManagers((prev) =>
+    setPendingManagers((prev) =>
       prev.includes(manager)
         ? prev.filter((m) => m !== manager)
         : [...prev, manager]
@@ -152,7 +209,7 @@ const ToolUsageReport = () => {
   };
 
   const handleProjectToggle = (project: string) => {
-    setSelectedProjects((prev) =>
+    setPendingProjects((prev) =>
       prev.includes(project)
         ? prev.filter((p) => p !== project)
         : [...prev, project]
@@ -160,7 +217,7 @@ const ToolUsageReport = () => {
   };
 
   const handleBrdBcdToggle = (option: string) => {
-    setSelectedBrdBcd((prev) =>
+    setPendingBrdBcd((prev) =>
       prev.includes(option)
         ? prev.filter((o) => o !== option)
         : [...prev, option]
@@ -173,6 +230,54 @@ const ToolUsageReport = () => {
     return selected.join(", ");
   };
 
+  // Export functionality
+  const exportToCSV = useCallback(() => {
+    const headers = ["User", "Role", "Project", "BRDs Generated", "BRD Avg Time", "BCDs Generated", "BCD Avg Time"];
+    const csvContent = [
+      headers.join(","),
+      ...filteredData.map(row => 
+        [row.user, row.role, row.project, row.brdsGenerated, `${row.brdAvgTime} mins`, row.bcdsGenerated, `${row.bcdAvgTime} mins`].join(",")
+      )
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `tool_usage_report_${format(new Date(), "yyyy-MM-dd")}.csv`;
+    link.click();
+  }, [filteredData]);
+
+  const exportToExcel = useCallback(() => {
+    // For Excel, we create a simple HTML table that Excel can open
+    const headers = ["User", "Role", "Project", "BRDs Generated", "BRD Avg Time", "BCDs Generated", "BCD Avg Time"];
+    const tableContent = `
+      <table>
+        <thead>
+          <tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr>
+        </thead>
+        <tbody>
+          ${filteredData.map(row => `
+            <tr>
+              <td>${row.user}</td>
+              <td>${row.role}</td>
+              <td>${row.project}</td>
+              <td>${row.brdsGenerated}</td>
+              <td>${row.brdAvgTime} mins</td>
+              <td>${row.bcdsGenerated}</td>
+              <td>${row.bcdAvgTime} mins</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    `;
+
+    const blob = new Blob([tableContent], { type: "application/vnd.ms-excel" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `tool_usage_report_${format(new Date(), "yyyy-MM-dd")}.xls`;
+    link.click();
+  }, [filteredData]);
+
   return (
     <MainLayout>
       <div className="flex-1 p-6 bg-background overflow-auto">
@@ -182,10 +287,28 @@ const ToolUsageReport = () => {
             <h1 className="text-lg font-bold text-foreground">Tool Usage Report</h1>
             <p className="text-sm text-muted-foreground">Monitor tool usage and user activity</p>
           </div>
-          <Button variant="outline" className="gap-2">
-            <Download className="h-4 w-4" />
-            Export Report
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="outline" 
+                className="gap-2"
+                disabled={!hasAppliedFilters}
+              >
+                <Download className="h-4 w-4" />
+                Export Report
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="bg-card">
+              <DropdownMenuItem onClick={exportToCSV} className="cursor-pointer gap-2">
+                <FileText className="h-4 w-4" />
+                CSV
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={exportToExcel} className="cursor-pointer gap-2">
+                <FileSpreadsheet className="h-4 w-4" />
+                Excel
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* Filters */}
@@ -197,18 +320,18 @@ const ToolUsageReport = () => {
                 variant="outline"
                 className={cn(
                   "w-[130px] justify-between text-left font-normal",
-                  !fromDate && "text-muted-foreground"
+                  !pendingFromDate && "text-muted-foreground"
                 )}
               >
-                {fromDate ? format(fromDate, "dd/MM/yy") : "From Date"}
+                {pendingFromDate ? format(pendingFromDate, "dd/MM/yy") : "From Date"}
                 <CalendarIcon className="h-4 w-4 opacity-50" />
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0 bg-card z-50" align="start">
               <Calendar
                 mode="single"
-                selected={fromDate}
-                onSelect={setFromDate}
+                selected={pendingFromDate}
+                onSelect={setPendingFromDate}
                 initialFocus
                 className="pointer-events-auto"
               />
@@ -222,18 +345,18 @@ const ToolUsageReport = () => {
                 variant="outline"
                 className={cn(
                   "w-[130px] justify-between text-left font-normal",
-                  !toDate && "text-muted-foreground"
+                  !pendingToDate && "text-muted-foreground"
                 )}
               >
-                {toDate ? format(toDate, "dd/MM/yy") : "To Date"}
+                {pendingToDate ? format(pendingToDate, "dd/MM/yy") : "To Date"}
                 <CalendarIcon className="h-4 w-4 opacity-50" />
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0 bg-card z-50" align="start">
               <Calendar
                 mode="single"
-                selected={toDate}
-                onSelect={setToDate}
+                selected={pendingToDate}
+                onSelect={setPendingToDate}
                 initialFocus
                 className="pointer-events-auto"
               />
@@ -248,7 +371,7 @@ const ToolUsageReport = () => {
                 className="min-w-[160px] justify-between text-left font-normal"
               >
                 <span className="truncate max-w-[120px]">
-                  {getFilterLabel(selectedManagers, "Product Manager")}
+                  {getFilterLabel(pendingManagers, "Product Manager")}
                 </span>
                 <ChevronRight className="h-4 w-4 opacity-50" />
               </Button>
@@ -261,7 +384,7 @@ const ToolUsageReport = () => {
                     className="flex items-center gap-2 p-2 hover:bg-muted rounded cursor-pointer"
                   >
                     <Checkbox
-                      checked={selectedManagers.includes(manager)}
+                      checked={pendingManagers.includes(manager)}
                       onCheckedChange={() => handleManagerToggle(manager)}
                     />
                     <span className="text-sm">{manager}</span>
@@ -279,7 +402,7 @@ const ToolUsageReport = () => {
                 className="min-w-[140px] justify-between text-left font-normal"
               >
                 <span className="truncate max-w-[100px]">
-                  {getFilterLabel(selectedProjects, "All Projects")}
+                  {getFilterLabel(pendingProjects, "All Projects")}
                 </span>
                 <ChevronRight className="h-4 w-4 opacity-50" />
               </Button>
@@ -292,7 +415,7 @@ const ToolUsageReport = () => {
                     className="flex items-center gap-2 p-2 hover:bg-muted rounded cursor-pointer"
                   >
                     <Checkbox
-                      checked={selectedProjects.includes(project)}
+                      checked={pendingProjects.includes(project)}
                       onCheckedChange={() => handleProjectToggle(project)}
                     />
                     <span className="text-sm">{project}</span>
@@ -310,7 +433,7 @@ const ToolUsageReport = () => {
                 className="min-w-[120px] justify-between text-left font-normal"
               >
                 <span className="truncate max-w-[80px]">
-                  {getFilterLabel(selectedBrdBcd, "BRD, BCD")}
+                  {getFilterLabel(pendingBrdBcd, "BRD, BCD")}
                 </span>
                 <ChevronRight className="h-4 w-4 opacity-50" />
               </Button>
@@ -323,7 +446,7 @@ const ToolUsageReport = () => {
                     className="flex items-center gap-2 p-2 hover:bg-muted rounded cursor-pointer"
                   >
                     <Checkbox
-                      checked={selectedBrdBcd.includes(option)}
+                      checked={pendingBrdBcd.includes(option)}
                       onCheckedChange={() => handleBrdBcdToggle(option)}
                     />
                     <span className="text-sm">{option}</span>
@@ -333,11 +456,20 @@ const ToolUsageReport = () => {
             </PopoverContent>
           </Popover>
 
+          {/* Apply Filter Button */}
+          <Button
+            onClick={handleApplyFilters}
+            disabled={!hasPendingFilters}
+            className="bg-primary text-primary-foreground hover:bg-primary/90"
+          >
+            Apply Filter
+          </Button>
+
           {/* Reset Filters Button - Only show when filters applied */}
-          {hasFiltersApplied && (
+          {hasAppliedFilters && (
             <Button
               onClick={handleResetFilters}
-              className="bg-primary text-primary-foreground hover:bg-primary/90"
+              variant="outline"
             >
               Reset Filters
             </Button>
