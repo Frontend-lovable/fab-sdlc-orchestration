@@ -456,14 +456,8 @@ const ToolUsageReport = () => {
             </PopoverContent>
           </Popover>
 
-          {/* Apply Filter Button */}
-          <Button
-            onClick={handleApplyFilters}
-            disabled={!hasPendingFilters}
-            className="bg-primary text-primary-foreground hover:bg-primary/90"
-          >
-            Apply Filter
-          </Button>
+          {/* Spacer to push buttons to the end */}
+          <div className="flex-1" />
 
           {/* Reset Filters Button - Only show when filters applied */}
           {hasAppliedFilters && (
@@ -474,6 +468,15 @@ const ToolUsageReport = () => {
               Reset Filters
             </Button>
           )}
+
+          {/* Apply Filter Button */}
+          <Button
+            onClick={handleApplyFilters}
+            disabled={!hasPendingFilters}
+            className="bg-primary text-primary-foreground hover:bg-primary/90"
+          >
+            Apply Filter
+          </Button>
         </div>
 
         {/* Table */}
