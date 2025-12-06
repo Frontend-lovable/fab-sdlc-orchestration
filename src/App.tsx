@@ -9,6 +9,7 @@ import BRDAssistant from "./pages/BRDAssistant";
 import ConfluencePage from "./pages/ConfluencePage";
 import JiraPage from "./pages/JiraPage";
 import DesignAssistant from "./pages/DesignAssistant";
+import ToolUsageReport from "./pages/ToolUsageReport";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="/confluence" element={<ConfluencePage />} />
             <Route path="/jira" element={<JiraPage />} />
             <Route path="/design-assistant" element={<DesignAssistant />} />
+            <Route path="/tool-usage-report" element={<ToolUsageReport />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
