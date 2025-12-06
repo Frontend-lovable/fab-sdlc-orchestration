@@ -498,11 +498,11 @@ const ToolUsageReport = () => {
       "BCD Avg Time",
     ];
 
-    // Header style: Bold, 16px font, dark blue background, white text
+    // Header style: Bold, 14px font, dark blue background (#0e4cb9), white text
     const headerStyle = {
-      font: { bold: true, sz: 16, color: { rgb: "FFFFFF" } },
-      fill: { fgColor: { rgb: "1F4E79" } },
-      alignment: { horizontal: "center", vertical: "center", wrapText: true },
+      font: { bold: true, sz: 14, color: { rgb: "FFFFFF" } },
+      fill: { fgColor: { rgb: "0E4CB9" } },
+      alignment: { horizontal: "center", vertical: "center", wrapText: false },
       border: {
         top: { style: "thin", color: { rgb: "000000" } },
         bottom: { style: "thin", color: { rgb: "000000" } },
@@ -511,9 +511,9 @@ const ToolUsageReport = () => {
       },
     };
 
-    // Data cell style: wrap text, borders
+    // Data cell style: no wrap text, borders
     const cellStyle = {
-      alignment: { horizontal: "left", vertical: "center", wrapText: true },
+      alignment: { horizontal: "left", vertical: "center", wrapText: false },
       border: {
         top: { style: "thin", color: { rgb: "CCCCCC" } },
         bottom: { style: "thin", color: { rgb: "CCCCCC" } },
