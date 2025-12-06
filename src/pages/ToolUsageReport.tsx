@@ -26,56 +26,46 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 
-// Dummy data
-const generateDummyData = () => {
-  const users = [
-    "Sarah Johnson",
-    "David Wilson",
-    "Emma Brown",
-    "Tia Johnson",
-    "Robert Taylor",
-    "Michael Chen",
-    "Jessica Lee",
-    "James Anderson",
-    "Emily Davis",
-    "Christopher Martin",
-    "Amanda White",
-    "Daniel Harris",
-  ];
+// Data type definition
+interface ReportData {
+  id: number;
+  user: string;
+  role: string;
+  project: string;
+  date: string;
+  brdsGenerated: number;
+  brdAvgTime: string;
+  bcdsGenerated: number;
+  bcdAvgTime: string;
+}
 
-  const projects = [
-    "UPI Integration",
-    "Payment Exchange",
-    "Customer Portal",
-    "Mobile Banking",
-    "Fraud Detection",
-  ];
-
-  const data = [];
-  const startDate = new Date(2025, 10, 1); // November 1, 2025
-
-  for (let i = 0; i < 24; i++) {
-    const recordDate = new Date(startDate);
-    recordDate.setDate(startDate.getDate() + Math.floor(Math.random() * 30));
-
-    data.push({
-      id: i + 1,
-      user: users[Math.floor(Math.random() * users.length)],
-      role: "Product Manager",
-      project: projects[Math.floor(Math.random() * projects.length)],
-      brdsGenerated: Math.floor(Math.random() * 15) + 1,
-      brdAvgTime: (Math.random() * 3 + 1).toFixed(1),
-      bcdsGenerated: Math.floor(Math.random() * 12) + 1,
-      bcdAvgTime: (Math.random() * 2 + 1).toFixed(1),
-      startDate: recordDate,
-      endDate: new Date(recordDate.getTime() + Math.floor(Math.random() * 10) * 24 * 60 * 60 * 1000),
-    });
-  }
-
-  return data;
-};
-
-const allData = generateDummyData();
+// Initial dummy data as JSON
+const initialData: ReportData[] = [
+  { id: 1, user: "Sarah Johnson", role: "Product Manager", project: "UPI Integration", date: "2025-11-05", brdsGenerated: 8, brdAvgTime: "2.5", bcdsGenerated: 5, bcdAvgTime: "1.8" },
+  { id: 2, user: "David Wilson", role: "Product Manager", project: "Payment Exchange", date: "2025-11-07", brdsGenerated: 12, brdAvgTime: "3.1", bcdsGenerated: 9, bcdAvgTime: "2.2" },
+  { id: 3, user: "Emma Brown", role: "Product Manager", project: "Customer Portal", date: "2025-11-10", brdsGenerated: 6, brdAvgTime: "2.0", bcdsGenerated: 4, bcdAvgTime: "1.5" },
+  { id: 4, user: "Tia Johnson", role: "Product Manager", project: "Mobile Banking", date: "2025-11-12", brdsGenerated: 15, brdAvgTime: "2.8", bcdsGenerated: 11, bcdAvgTime: "2.0" },
+  { id: 5, user: "Robert Taylor", role: "Product Manager", project: "Fraud Detection", date: "2025-11-14", brdsGenerated: 9, brdAvgTime: "3.5", bcdsGenerated: 7, bcdAvgTime: "2.4" },
+  { id: 6, user: "Michael Chen", role: "Product Manager", project: "UPI Integration", date: "2025-11-16", brdsGenerated: 11, brdAvgTime: "2.3", bcdsGenerated: 8, bcdAvgTime: "1.9" },
+  { id: 7, user: "Jessica Lee", role: "Product Manager", project: "Payment Exchange", date: "2025-11-18", brdsGenerated: 7, brdAvgTime: "2.7", bcdsGenerated: 6, bcdAvgTime: "2.1" },
+  { id: 8, user: "James Anderson", role: "Product Manager", project: "Customer Portal", date: "2025-11-20", brdsGenerated: 14, brdAvgTime: "3.0", bcdsGenerated: 10, bcdAvgTime: "2.3" },
+  { id: 9, user: "Emily Davis", role: "Product Manager", project: "Mobile Banking", date: "2025-11-22", brdsGenerated: 5, brdAvgTime: "2.2", bcdsGenerated: 3, bcdAvgTime: "1.6" },
+  { id: 10, user: "Christopher Martin", role: "Product Manager", project: "Fraud Detection", date: "2025-11-24", brdsGenerated: 10, brdAvgTime: "2.9", bcdsGenerated: 8, bcdAvgTime: "2.0" },
+  { id: 11, user: "Amanda White", role: "Product Manager", project: "UPI Integration", date: "2025-11-26", brdsGenerated: 13, brdAvgTime: "3.2", bcdsGenerated: 9, bcdAvgTime: "2.5" },
+  { id: 12, user: "Daniel Harris", role: "Product Manager", project: "Payment Exchange", date: "2025-11-28", brdsGenerated: 8, brdAvgTime: "2.6", bcdsGenerated: 6, bcdAvgTime: "1.7" },
+  { id: 13, user: "Sarah Johnson", role: "Product Manager", project: "Customer Portal", date: "2025-11-03", brdsGenerated: 11, brdAvgTime: "2.4", bcdsGenerated: 7, bcdAvgTime: "1.9" },
+  { id: 14, user: "David Wilson", role: "Product Manager", project: "Mobile Banking", date: "2025-11-08", brdsGenerated: 9, brdAvgTime: "3.3", bcdsGenerated: 5, bcdAvgTime: "2.2" },
+  { id: 15, user: "Emma Brown", role: "Product Manager", project: "Fraud Detection", date: "2025-11-11", brdsGenerated: 7, brdAvgTime: "2.1", bcdsGenerated: 4, bcdAvgTime: "1.4" },
+  { id: 16, user: "Tia Johnson", role: "Product Manager", project: "UPI Integration", date: "2025-11-15", brdsGenerated: 16, brdAvgTime: "2.9", bcdsGenerated: 12, bcdAvgTime: "2.1" },
+  { id: 17, user: "Robert Taylor", role: "Product Manager", project: "Payment Exchange", date: "2025-11-19", brdsGenerated: 6, brdAvgTime: "3.4", bcdsGenerated: 5, bcdAvgTime: "2.6" },
+  { id: 18, user: "Michael Chen", role: "Product Manager", project: "Customer Portal", date: "2025-11-21", brdsGenerated: 12, brdAvgTime: "2.5", bcdsGenerated: 9, bcdAvgTime: "1.8" },
+  { id: 19, user: "Jessica Lee", role: "Product Manager", project: "Mobile Banking", date: "2025-11-23", brdsGenerated: 8, brdAvgTime: "2.8", bcdsGenerated: 7, bcdAvgTime: "2.0" },
+  { id: 20, user: "James Anderson", role: "Product Manager", project: "Fraud Detection", date: "2025-11-25", brdsGenerated: 10, brdAvgTime: "3.1", bcdsGenerated: 8, bcdAvgTime: "2.4" },
+  { id: 21, user: "Emily Davis", role: "Product Manager", project: "UPI Integration", date: "2025-11-27", brdsGenerated: 4, brdAvgTime: "2.0", bcdsGenerated: 3, bcdAvgTime: "1.5" },
+  { id: 22, user: "Christopher Martin", role: "Product Manager", project: "Payment Exchange", date: "2025-11-29", brdsGenerated: 11, brdAvgTime: "3.0", bcdsGenerated: 7, bcdAvgTime: "2.1" },
+  { id: 23, user: "Amanda White", role: "Product Manager", project: "Customer Portal", date: "2025-11-02", brdsGenerated: 14, brdAvgTime: "3.3", bcdsGenerated: 10, bcdAvgTime: "2.3" },
+  { id: 24, user: "Daniel Harris", role: "Product Manager", project: "Mobile Banking", date: "2025-11-06", brdsGenerated: 9, brdAvgTime: "2.7", bcdsGenerated: 6, bcdAvgTime: "1.8" },
+];
 
 interface AppliedFilters {
   fromDate: Date | undefined;
@@ -86,6 +76,9 @@ interface AppliedFilters {
 }
 
 const ToolUsageReport = () => {
+  // Store all data in useState
+  const [allData] = useState<ReportData[]>(initialData);
+  
   // Pending filter states (for selection before applying)
   const [pendingFromDate, setPendingFromDate] = useState<Date | undefined>(undefined);
   const [pendingToDate, setPendingToDate] = useState<Date | undefined>(undefined);
@@ -110,8 +103,8 @@ const ToolUsageReport = () => {
   const itemsPerPage = 8;
 
   // Get unique values for filters
-  const uniqueManagers = [...new Set(allData.map((d) => d.user))];
-  const uniqueProjects = [...new Set(allData.map((d) => d.project))];
+  const uniqueManagers = [...new Set(allData.map((d) => d.user))] as string[];
+  const uniqueProjects = [...new Set(allData.map((d) => d.project))] as string[];
   const brdBcdOptions = ["BRD", "BCD"];
 
   // Check if any pending filters are selected
@@ -143,12 +136,13 @@ const ToolUsageReport = () => {
     // Date range filter
     if (appliedFilters.fromDate && appliedFilters.toDate) {
       result = result.filter((item) => {
-        return isWithinInterval(item.startDate, { start: appliedFilters.fromDate!, end: appliedFilters.toDate! });
+        const itemDate = new Date(item.date);
+        return isWithinInterval(itemDate, { start: appliedFilters.fromDate!, end: appliedFilters.toDate! });
       });
     } else if (appliedFilters.fromDate) {
-      result = result.filter((item) => item.startDate >= appliedFilters.fromDate!);
+      result = result.filter((item) => new Date(item.date) >= appliedFilters.fromDate!);
     } else if (appliedFilters.toDate) {
-      result = result.filter((item) => item.startDate <= appliedFilters.toDate!);
+      result = result.filter((item) => new Date(item.date) <= appliedFilters.toDate!);
     }
 
     // Manager filter
@@ -161,8 +155,17 @@ const ToolUsageReport = () => {
       result = result.filter((item) => appliedFilters.projects.includes(item.project));
     }
 
+    // BRD/BCD filter - show only rows that have data for selected options
+    if (appliedFilters.brdBcd.length > 0) {
+      result = result.filter((item) => {
+        if (appliedFilters.brdBcd.includes("BRD") && item.brdsGenerated > 0) return true;
+        if (appliedFilters.brdBcd.includes("BCD") && item.bcdsGenerated > 0) return true;
+        return false;
+      });
+    }
+
     return result;
-  }, [appliedFilters]);
+  }, [appliedFilters, allData]);
 
   // Pagination
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
@@ -232,11 +235,11 @@ const ToolUsageReport = () => {
 
   // Export functionality
   const exportToCSV = useCallback(() => {
-    const headers = ["User", "Role", "Project", "BRDs Generated", "BRD Avg Time", "BCDs Generated", "BCD Avg Time"];
+    const headers = ["User", "Role", "Project", "Date", "BRDs Generated", "BRD Avg Time", "BCDs Generated", "BCD Avg Time"];
     const csvContent = [
       headers.join(","),
       ...filteredData.map(row => 
-        [row.user, row.role, row.project, row.brdsGenerated, `${row.brdAvgTime} mins`, row.bcdsGenerated, `${row.bcdAvgTime} mins`].join(",")
+        [row.user, row.role, row.project, format(new Date(row.date), "dd/MM/yyyy"), row.brdsGenerated, `${row.brdAvgTime} mins`, row.bcdsGenerated, `${row.bcdAvgTime} mins`].join(",")
       )
     ].join("\n");
 
@@ -249,7 +252,7 @@ const ToolUsageReport = () => {
 
   const exportToExcel = useCallback(() => {
     // For Excel, we create a simple HTML table that Excel can open
-    const headers = ["User", "Role", "Project", "BRDs Generated", "BRD Avg Time", "BCDs Generated", "BCD Avg Time"];
+    const headers = ["User", "Role", "Project", "Date", "BRDs Generated", "BRD Avg Time", "BCDs Generated", "BCD Avg Time"];
     const tableContent = `
       <table>
         <thead>
@@ -261,6 +264,7 @@ const ToolUsageReport = () => {
               <td>${row.user}</td>
               <td>${row.role}</td>
               <td>${row.project}</td>
+              <td>${format(new Date(row.date), "dd/MM/yyyy")}</td>
               <td>${row.brdsGenerated}</td>
               <td>${row.brdAvgTime} mins</td>
               <td>${row.bcdsGenerated}</td>
@@ -488,6 +492,7 @@ const ToolUsageReport = () => {
                   <TableHead className="font-medium text-foreground" rowSpan={2}>User</TableHead>
                   <TableHead className="font-medium text-foreground" rowSpan={2}>Role</TableHead>
                   <TableHead className="font-medium text-foreground" rowSpan={2}>Project</TableHead>
+                  <TableHead className="font-medium text-foreground" rowSpan={2}>Date</TableHead>
                   <TableHead className="font-medium text-foreground text-center border-l" colSpan={2}>
                     BRD Assistant
                   </TableHead>
@@ -517,6 +522,7 @@ const ToolUsageReport = () => {
                         {row.project}
                       </div>
                     </TableCell>
+                    <TableCell>{format(new Date(row.date), "dd/MM/yyyy")}</TableCell>
                     <TableCell className="text-center border-l font-medium">{row.brdsGenerated}</TableCell>
                     <TableCell className="text-center text-muted-foreground">{row.brdAvgTime} mins</TableCell>
                     <TableCell className="text-center border-l font-medium">{row.bcdsGenerated}</TableCell>
@@ -525,7 +531,7 @@ const ToolUsageReport = () => {
                 ))}
                 {paginatedData.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                       No data found matching the selected filters.
                     </TableCell>
                   </TableRow>
