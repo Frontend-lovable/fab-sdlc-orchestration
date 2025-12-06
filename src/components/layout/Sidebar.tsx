@@ -9,7 +9,8 @@ import {
   ChevronRight,
   ArrowLeft,
   ChevronLeft,
-  X
+  X,
+  BarChart3
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -45,6 +46,13 @@ const navigationItems = [
     description: "Technical architecture planning",
     id: "design",
     path: "/design-assistant",
+  },
+  {
+    icon: BarChart3,
+    label: "Tool Usage Report",
+    description: "Analytics & usage stats",
+    id: "tool-usage",
+    path: "/tool-usage-report",
   },
 ];
 
