@@ -587,6 +587,9 @@ const ToolUsageReport = () => {
     // Set row height for header
     ws["!rows"] = [{ hpt: 30 }];
 
+    // Hide default gridlines - only show borders on data cells
+    ws["!sheetViews"] = [{ showGridLines: false }];
+
     // Create workbook
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Tool Usage Report");
