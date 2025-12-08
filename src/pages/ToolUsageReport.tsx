@@ -587,12 +587,15 @@ const ToolUsageReport = () => {
     // Set row height for header
     ws["!rows"] = [{ hpt: 30 }];
 
-    // Hide default gridlines - only show borders on data cells
-    ws["!sheetViews"] = [{ showGridLines: false }];
-
     // Create workbook
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Tool Usage Report");
+
+    // Hide default gridlines - only show borders on data cells
+    const sheet = wb.Sheets["Tool Usage Report"];
+    if (sheet) {
+      (sheet as any)["!sheetViews"] = [{ showGridLines: false }];
+    }
 
     // Export file
     XLSX.writeFile(wb, `tool_usage_report_${format(new Date(), "yyyy-MM-dd")}.xlsx`);
