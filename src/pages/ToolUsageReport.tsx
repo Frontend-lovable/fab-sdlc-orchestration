@@ -535,10 +535,26 @@ const ToolUsageReport = () => {
       { v: row.role, t: "s", s: cellStyle },
       { v: row.project, t: "s", s: cellStyle },
       { v: format(new Date(row.date), "dd/MM/yyyy"), t: "s", s: cellStyle },
-      { v: row.brdsGenerated, t: "n", s: { ...cellStyle, alignment: { ...cellStyle.alignment, horizontal: "center" } } },
-      { v: `${row.brdAvgTime} mins`, t: "s", s: { ...cellStyle, alignment: { ...cellStyle.alignment, horizontal: "center" } } },
-      { v: row.bcdsGenerated, t: "n", s: { ...cellStyle, alignment: { ...cellStyle.alignment, horizontal: "center" } } },
-      { v: `${row.bcdAvgTime} mins`, t: "s", s: { ...cellStyle, alignment: { ...cellStyle.alignment, horizontal: "center" } } },
+      {
+        v: row.brdsGenerated,
+        t: "n",
+        s: { ...cellStyle, alignment: { ...cellStyle.alignment, horizontal: "center" } },
+      },
+      {
+        v: `${row.brdAvgTime} mins`,
+        t: "s",
+        s: { ...cellStyle, alignment: { ...cellStyle.alignment, horizontal: "center" } },
+      },
+      {
+        v: row.bcdsGenerated,
+        t: "n",
+        s: { ...cellStyle, alignment: { ...cellStyle.alignment, horizontal: "center" } },
+      },
+      {
+        v: `${row.bcdAvgTime} mins`,
+        t: "s",
+        s: { ...cellStyle, alignment: { ...cellStyle.alignment, horizontal: "center" } },
+      },
     ]);
 
     // Create worksheet data with styled headers and data
@@ -563,7 +579,7 @@ const ToolUsageReport = () => {
             `${row.bcdAvgTime} mins`,
           ];
           return String(values[colIndex]).length;
-        })
+        }),
       );
       return { wch: Math.max(maxContentLength + 4, 18) };
     });
@@ -598,13 +614,13 @@ const ToolUsageReport = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="bg-card">
-                <DropdownMenuItem onClick={exportToCSV} className="cursor-pointer gap-2">
-                  <FileText className="h-4 w-4" />
-                  CSV
-                </DropdownMenuItem>
                 <DropdownMenuItem onClick={exportToExcel} className="cursor-pointer gap-2">
                   <FileSpreadsheet className="h-4 w-4" />
                   Excel
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={exportToCSV} className="cursor-pointer gap-2">
+                  <FileText className="h-4 w-4" />
+                  CSV
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -767,9 +783,9 @@ const ToolUsageReport = () => {
                   <TableHead className="font-medium text-foreground" rowSpan={2}>
                     Project
                   </TableHead>
-                  <TableHead className="font-medium text-foreground" rowSpan={2}>
+                  {/* <TableHead className="font-medium text-foreground" rowSpan={2}>
                     Date
-                  </TableHead>
+                  </TableHead> */}
                   <TableHead className="font-medium text-foreground text-center border-l bg-[#E8F1FE]" colSpan={2}>
                     BRD Assistant
                   </TableHead>
@@ -779,9 +795,9 @@ const ToolUsageReport = () => {
                 </TableRow>
                 <TableRow className="bg-[#F0F5FE]">
                   <TableHead className="font-medium text-foreground text-center border-l">BRDs Generated</TableHead>
-                  <TableHead className="font-medium text-foreground text-center">Avg. Time Taken</TableHead>
+                  <TableHead className="font-medium text-foreground text-center">Avg. Time Taken in mins.</TableHead>
                   <TableHead className="font-medium text-foreground text-center border-l">BCDs Generated</TableHead>
-                  <TableHead className="font-medium text-foreground text-center">Avg. Time Taken</TableHead>
+                  <TableHead className="font-medium text-foreground text-center">Avg. Time Taken in mins.</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -799,11 +815,11 @@ const ToolUsageReport = () => {
                         {row.project}
                       </div>
                     </TableCell>
-                    <TableCell>{format(new Date(row.date), "dd/MM/yyyy")}</TableCell>
+                    {/* <TableCell>{format(new Date(row.date), "dd/MM/yyyy")}</TableCell> */}
                     <TableCell className="text-center border-l font-bold">{row.brdsGenerated}</TableCell>
-                    <TableCell className="text-center text-[#3B3B3B]">{row.brdAvgTime} mins</TableCell>
+                    <TableCell className="text-center text-[#3B3B3B]">{row.brdAvgTime}</TableCell>
                     <TableCell className="text-center border-l font-bold">{row.bcdsGenerated}</TableCell>
-                    <TableCell className="text-center text-[#3B3B3B]">{row.bcdAvgTime} mins</TableCell>
+                    <TableCell className="text-center text-[#3B3B3B]">{row.bcdAvgTime}</TableCell>
                   </TableRow>
                 ))}
                 {paginatedData.length === 0 && (
