@@ -498,28 +498,27 @@ const ToolUsageReport = () => {
       "BCD Avg Time",
     ];
 
-    // Header style: Bold, 14px font, dark blue background (#0e4cb9), white text
-    const headerStyle = {
-      font: { bold: true, sz: 14, color: { rgb: "FFFFFF" } },
-      fill: { fgColor: { rgb: "0E4CB9" } },
-      alignment: { horizontal: "center", vertical: "center", wrapText: false },
-      border: {
-        top: { style: "thin", color: { rgb: "000000" } },
-        bottom: { style: "thin", color: { rgb: "000000" } },
-        left: { style: "thin", color: { rgb: "000000" } },
-        right: { style: "thin", color: { rgb: "000000" } },
-      },
+    // Border style for all cells
+    const borderStyle = {
+      top: { style: "thin", color: { rgb: "000000" } },
+      bottom: { style: "thin", color: { rgb: "000000" } },
+      left: { style: "thin", color: { rgb: "000000" } },
+      right: { style: "thin", color: { rgb: "000000" } },
     };
 
-    // Data cell style: no wrap text, borders
-    const cellStyle = {
+    // Header style: Bold, 11px font, dark blue background (#0e4cb9), white text
+    const headerStyle = {
+      font: { bold: true, sz: 11, color: { rgb: "FFFFFF" } },
+      fill: { fgColor: { rgb: "0E4CB9" } },
       alignment: { horizontal: "left", vertical: "center", wrapText: false },
-      border: {
-        top: { style: "thin", color: { rgb: "CCCCCC" } },
-        bottom: { style: "thin", color: { rgb: "CCCCCC" } },
-        left: { style: "thin", color: { rgb: "CCCCCC" } },
-        right: { style: "thin", color: { rgb: "CCCCCC" } },
-      },
+      border: borderStyle,
+    };
+
+    // Data cell style: no wrap text, thin black borders
+    const cellStyle = {
+      font: { sz: 11 },
+      alignment: { horizontal: "left", vertical: "center", wrapText: false },
+      border: borderStyle,
     };
 
     // Create styled header row
