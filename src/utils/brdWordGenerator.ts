@@ -293,12 +293,12 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
   const createTocEntry = (
     number: string,
     title: string,
+    pageNum: string,
     isMainSection: boolean = true,
     indent: number = 0
   ) => {
-    // Create dot leaders that span to align
-    const fullText = `${number} ${title}`;
-    const dotCount = isMainSection ? 60 - fullText.length : 55 - fullText.length;
+    // Create dot leaders that span to align with page numbers
+    const dotCount = isMainSection ? 70 - title.length : 60 - title.length;
     const dotLeader = ".".repeat(Math.max(dotCount, 10));
     
     return new Paragraph({
@@ -312,7 +312,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           color: TOC_GREEN,
         }),
         new TextRun({
-          text: " ",
+          text: isMainSection ? " " : "  ",
           size: 22,
         }),
         new TextRun({
@@ -325,6 +325,12 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
         }),
         new TextRun({
           text: dotLeader,
+          size: 22,
+          font: "Arial",
+          color: TOC_GREEN,
+        }),
+        new TextRun({
+          text: pageNum,
           size: 22,
           font: "Arial",
           color: TOC_GREEN,
@@ -351,20 +357,20 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
       spacing: { before: 400, after: 600 },
     }),
     // Main sections
-    createTocEntry("1", "Business Requirements"),
-    createTocEntry("2", "Purpose"),
-    createTocEntry("3", "Overview"),
-    createTocEntry("3.1", "Requesting Line of Business", false, 720),
-    createTocEntry("3.2", "Stakeholders", false, 720),
-    createTocEntry("3.3", "Description", false, 720),
-    createTocEntry("3.4", "Assumptions", false, 720),
-    createTocEntry("3.5", "Dependencies", false, 720),
-    createTocEntry("4", "Scope"),
-    createTocEntry("5", "Current and Target State Analysis"),
-    createTocEntry("6", "Appendices"),
-    createTocEntry("6.1", "Appendix I -Definitions, Acronyms, and Abbreviations", false, 720),
-    createTocEntry("6.2", "Appendix II –Reference Material", false, 720),
-    createTocEntry("7", "Approvals & Acknowledgments"),
+    createTocEntry("1", "Business Requirements", "1"),
+    createTocEntry("2", "Purpose", "2"),
+    createTocEntry("3", "Overview", "3"),
+    createTocEntry("3.1", "Requesting Line of Business", "3", false, 720),
+    createTocEntry("3.2", "Stakeholders", "3", false, 720),
+    createTocEntry("3.3", "Description", "4", false, 720),
+    createTocEntry("3.4", "Assumptions", "4", false, 720),
+    createTocEntry("3.5", "Dependencies", "4", false, 720),
+    createTocEntry("4", ". Scope", "6"),
+    createTocEntry("5", "Current and Target State Analysis", "7"),
+    createTocEntry("6", "Appendices", "8"),
+    createTocEntry("6.1", "Appendix I -Definitions, Acronyms, and Abbreviations", "8", false, 720),
+    createTocEntry("6.2", "Appendix II –Reference Material", "8", false, 720),
+    createTocEntry("7", "Approvals & Acknowledgments", "9"),
     new Paragraph({ children: [new PageBreak()] }),
   ];
 
