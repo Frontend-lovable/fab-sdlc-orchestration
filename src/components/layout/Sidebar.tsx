@@ -54,6 +54,13 @@ const navigationItems = [
     id: "tool-usage",
     path: "/tool-usage-report",
   },
+  {
+    icon: FileText,
+    label: "Formatting Response",
+    description: "Response formatting tools",
+    id: "formatting",
+    path: "/formatting-response",
+  },
 ];
 
 const bottomItems = [
