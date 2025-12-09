@@ -31,6 +31,14 @@ interface BRDSection {
   content?: string;
 }
 
+interface BRDResponseData {
+  title: string;
+  version: string;
+  date: string;
+  owner: string;
+  rawContent: string;
+}
+
 interface AppStateContextType {
   selectedProject: Project | null;
   setSelectedProject: (project: Project | null) => void;
@@ -66,6 +74,8 @@ interface AppStateContextType {
   setIsCreatingJiraStory: (creating: boolean) => void;
   newlyCreatedJiraIssueId: string | null;
   setNewlyCreatedJiraIssueId: (issueId: string | null) => void;
+  brdResponseData: BRDResponseData | null;
+  setBrdResponseData: (data: BRDResponseData | null) => void;
 }
 
 const AppStateContext = createContext<AppStateContextType | undefined>(undefined);
@@ -91,6 +101,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
   const [activeConfluencePageId, setActiveConfluencePageId] = useState<string | null>(null);
   const [isCreatingJiraStory, setIsCreatingJiraStory] = useState(false);
   const [newlyCreatedJiraIssueId, setNewlyCreatedJiraIssueId] = useState<string | null>(null);
+  const [brdResponseData, setBrdResponseData] = useState<BRDResponseData | null>(null);
 
   const setChatMessages = (view: keyof AppStateContextType["chatMessages"], messages: ChatMessageType[]) => {
     setChatMessagesState(prev => ({
@@ -134,6 +145,8 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
         setIsCreatingJiraStory,
         newlyCreatedJiraIssueId,
         setNewlyCreatedJiraIssueId,
+        brdResponseData,
+        setBrdResponseData,
       }}
     >
       {children}
