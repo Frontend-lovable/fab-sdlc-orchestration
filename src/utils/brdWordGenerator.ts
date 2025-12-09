@@ -56,6 +56,8 @@ interface ParsedBRD {
 const FAB_BLUE = "1E3A8A";
 const FAB_RED = "DC2626";
 const DARK_GRAY = "3B3B3B";
+const BLACK = "000000";
+const TOC_GREEN = "00A651";
 
 // Table border style
 const tableBorders = {
@@ -287,10 +289,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
     new Paragraph({ children: [new PageBreak()] }),
   ];
 
-  // Green color for TOC
-  const TOC_GREEN = "00A651";
-
-  // Helper function to create TOC entry with dot leaders
+  // Helper function to create TOC entry with dot leaders - matching template format
   const createTocEntry = (
     number: string,
     title: string,
@@ -298,7 +297,10 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
     isMainSection: boolean = true,
     indent: number = 0
   ) => {
-    const dotLeader = "." + ".".repeat(80);
+    // Create dot leaders that span to align with page numbers
+    const dotCount = isMainSection ? 70 - title.length : 60 - title.length;
+    const dotLeader = ".".repeat(Math.max(dotCount, 10));
+    
     return new Paragraph({
       children: [
         new TextRun({
@@ -310,7 +312,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           color: TOC_GREEN,
         }),
         new TextRun({
-          text: "\t",
+          text: isMainSection ? " " : "  ",
           size: 22,
         }),
         new TextRun({
@@ -329,18 +331,13 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
         }),
         new TextRun({
           text: pageNum,
-          bold: isMainSection,
-          italics: isMainSection,
           size: 22,
           font: "Arial",
           color: TOC_GREEN,
         }),
       ],
       indent: { left: indent },
-      spacing: { after: 120 },
-      tabStops: [
-        { type: "right", position: 9000, leader: "dot" },
-      ],
+      spacing: { after: 140 },
     });
   };
 
@@ -385,7 +382,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "1. BUSINESS REQUIREMENTS",
           bold: true,
           size: 28,
-          color: FAB_BLUE,
+          color: BLACK,
           font: "Arial",
         }),
       ],
@@ -451,7 +448,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "2. EXECUTIVE SUMMARY",
           bold: true,
           size: 28,
-          color: FAB_BLUE,
+          color: BLACK,
           font: "Arial",
         }),
       ],
@@ -472,7 +469,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "3. PROJECT OVERVIEW",
           bold: true,
           size: 28,
-          color: FAB_BLUE,
+          color: BLACK,
           font: "Arial",
         }),
       ],
@@ -485,7 +482,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "3.1 Project Background",
           bold: true,
           size: 24,
-          color: FAB_BLUE,
+          color: BLACK,
           font: "Arial",
         }),
       ],
@@ -502,7 +499,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "3.2 Project Purpose and Objectives",
           bold: true,
           size: 24,
-          color: FAB_BLUE,
+          color: BLACK,
           font: "Arial",
         }),
       ],
@@ -535,7 +532,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "3.3 Project Stakeholders",
           bold: true,
           size: 24,
-          color: FAB_BLUE,
+          color: BLACK,
           font: "Arial",
         }),
       ],
@@ -563,7 +560,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "3.4 Detailed Business Requirements",
           bold: true,
           size: 24,
-          color: FAB_BLUE,
+          color: BLACK,
           font: "Arial",
         }),
       ],
@@ -661,7 +658,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "4. ASSUMPTIONS, DEPENDENCIES, AND CONSTRAINTS",
           bold: true,
           size: 28,
-          color: FAB_BLUE,
+          color: BLACK,
           font: "Arial",
         }),
       ],
@@ -673,7 +670,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "4.1 Assumptions",
           bold: true,
           size: 24,
-          color: FAB_BLUE,
+          color: BLACK,
           font: "Arial",
         }),
       ],
@@ -692,7 +689,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "4.2 Dependencies",
           bold: true,
           size: 24,
-          color: FAB_BLUE,
+          color: BLACK,
           font: "Arial",
         }),
       ],
@@ -711,7 +708,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "4.3 Constraints",
           bold: true,
           size: 24,
-          color: FAB_BLUE,
+          color: BLACK,
           font: "Arial",
         }),
       ],
@@ -735,7 +732,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "5. PROJECT SCOPE",
           bold: true,
           size: 28,
-          color: FAB_BLUE,
+          color: BLACK,
           font: "Arial",
         }),
       ],
@@ -747,7 +744,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "5.1 In Scope",
           bold: true,
           size: 24,
-          color: FAB_BLUE,
+          color: BLACK,
           font: "Arial",
         }),
       ],
@@ -766,7 +763,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "5.2 Out of Scope",
           bold: true,
           size: 24,
-          color: FAB_BLUE,
+          color: BLACK,
           font: "Arial",
         }),
       ],
@@ -790,7 +787,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "6. CURRENT AND TARGET STATE ANALYSIS",
           bold: true,
           size: 28,
-          color: FAB_BLUE,
+          color: BLACK,
           font: "Arial",
         }),
       ],
@@ -802,7 +799,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "6.1 Current State Analysis",
           bold: true,
           size: 24,
-          color: FAB_BLUE,
+          color: BLACK,
           font: "Arial",
         }),
       ],
@@ -827,7 +824,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "6.2 Target State Analysis",
           bold: true,
           size: 24,
-          color: FAB_BLUE,
+          color: BLACK,
           font: "Arial",
         }),
       ],
@@ -857,7 +854,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "7. APPENDICES",
           bold: true,
           size: 28,
-          color: FAB_BLUE,
+          color: BLACK,
           font: "Arial",
         }),
       ],
@@ -869,7 +866,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "7.1 Appendix I - Definitions, Acronyms, and Abbreviations",
           bold: true,
           size: 24,
-          color: FAB_BLUE,
+          color: BLACK,
           font: "Arial",
         }),
       ],
@@ -907,7 +904,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "7.2 Appendix II - Reference Material",
           bold: true,
           size: 24,
-          color: FAB_BLUE,
+          color: BLACK,
           font: "Arial",
         }),
       ],
@@ -939,7 +936,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "8. SIGN OFF / ACKNOWLEDGEMENT",
           bold: true,
           size: 28,
-          color: FAB_BLUE,
+          color: BLACK,
           font: "Arial",
         }),
       ],
@@ -989,7 +986,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           run: {
             size: 28,
             bold: true,
-            color: FAB_BLUE,
+            color: BLACK,
             font: "Arial",
           },
           paragraph: {
@@ -1000,7 +997,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           run: {
             size: 24,
             bold: true,
-            color: FAB_BLUE,
+            color: BLACK,
             font: "Arial",
           },
           paragraph: {
