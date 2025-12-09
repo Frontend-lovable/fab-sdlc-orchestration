@@ -58,6 +58,11 @@ const FAB_RED = "DC2626";
 const DARK_GRAY = "3B3B3B";
 const BLACK = "000000";
 const TOC_GREEN = "00A651";
+const HEADING_BLUE = "4472C4";
+const TABLE_HEADER_BG = "DBDBDB";
+
+// Default font
+const DEFAULT_FONT = "Palatino Linotype";
 
 // Table border style
 const tableBorders = {
@@ -73,11 +78,12 @@ const createHeaderCell = (text: string, width?: number) => {
   return new TableCell({
     children: [
       new Paragraph({
-        children: [new TextRun({ text, bold: true, size: 22, font: "Arial" })],
+        children: [new TextRun({ text, bold: true, size: 22, font: DEFAULT_FONT })],
         alignment: AlignmentType.CENTER,
+        spacing: { before: 80, after: 80 },
       }),
     ],
-    shading: { fill: "E5E7EB", type: ShadingType.CLEAR },
+    shading: { fill: TABLE_HEADER_BG, type: ShadingType.CLEAR },
     verticalAlign: VerticalAlign.CENTER,
     width: width ? { size: width, type: WidthType.PERCENTAGE } : undefined,
   });
@@ -87,7 +93,8 @@ const createCell = (text: string, width?: number) => {
   return new TableCell({
     children: [
       new Paragraph({
-        children: [new TextRun({ text, size: 22, font: "Arial" })],
+        children: [new TextRun({ text, size: 22, font: DEFAULT_FONT })],
+        spacing: { before: 60, after: 60 },
       }),
     ],
     verticalAlign: VerticalAlign.CENTER,
@@ -97,36 +104,72 @@ const createCell = (text: string, width?: number) => {
 
 const createEmptyCell = (width?: number) => {
   return new TableCell({
-    children: [new Paragraph({ text: "" })],
+    children: [new Paragraph({ text: "", spacing: { before: 60, after: 60 } })],
     width: width ? { size: width, type: WidthType.PERCENTAGE } : undefined,
   });
 };
 
+// Helper function to load logo as base64
+const loadLogoAsBase64 = async (): Promise<string | null> => {
+  try {
+    const response = await fetch('/src/assets/fab-logo-word.png');
+    const blob = await response.blob();
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return null;
+  }
+};
+
 export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string) => {
+  // Try to load the FAB logo
+  let logoData: Uint8Array | null = null;
+  try {
+    const logoModule = await import('@/assets/fab-logo-word.png');
+    const response = await fetch(logoModule.default);
+    const blob = await response.blob();
+    const arrayBuffer = await blob.arrayBuffer();
+    logoData = new Uint8Array(arrayBuffer);
+  } catch (error) {
+    console.log('Could not load logo:', error);
+  }
+
   // Cover Page Section
   const coverPageChildren = [
-    // Logo placeholder area - spacing for logo
-    new Paragraph({
-      alignment: AlignmentType.CENTER,
-      spacing: { after: 600 },
-      children: logoBase64
-        ? [
-            new ImageRun({
-              data: logoBase64,
-              transformation: { width: 200, height: 80 },
-              type: "jpg",
-            }),
-          ]
-        : [
-            new TextRun({
-              text: "FAB | Grow Stronger",
-              bold: true,
-              size: 36,
-              color: FAB_BLUE,
-              font: "Arial",
-            }),
-          ],
-    }),
+    // FAB Logo at the top
+    ...(logoData
+      ? [
+          new Paragraph({
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 600 },
+            children: [
+              new ImageRun({
+                data: logoData,
+                transformation: { width: 280, height: 80 },
+                type: "png",
+              }),
+            ],
+          }),
+        ]
+      : [
+          new Paragraph({
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 600 },
+            children: [
+              new TextRun({
+                text: "FAB | Grow Stronger",
+                bold: true,
+                size: 36,
+                color: FAB_BLUE,
+                font: DEFAULT_FONT,
+              }),
+            ],
+          }),
+        ]),
     new Paragraph({ spacing: { after: 1200 } }),
     new Paragraph({ spacing: { after: 1200 } }),
     // Project Name in Italics
@@ -137,7 +180,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: `"${parsedBRD.title}"`,
           italics: true,
           size: 48,
-          font: "Times New Roman",
+          font: DEFAULT_FONT,
           color: DARK_GRAY,
         }),
       ],
@@ -151,7 +194,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "Business Requirements Document",
           bold: true,
           size: 44,
-          font: "Arial",
+          font: DEFAULT_FONT,
           color: DARK_GRAY,
         }),
       ],
@@ -165,7 +208,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
         new TextRun({
           text: `Document Version: ${parsedBRD.version}`,
           size: 22,
-          font: "Arial",
+          font: DEFAULT_FONT,
         }),
       ],
       spacing: { after: 100 },
@@ -176,7 +219,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
         new TextRun({
           text: `Date of submission: ${parsedBRD.date}`,
           size: 22,
-          font: "Arial",
+          font: DEFAULT_FONT,
         }),
       ],
       spacing: { after: 400 },
@@ -188,7 +231,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
         new TextRun({
           text: "Classified: Internal | FAB Internal",
           size: 18,
-          font: "Arial",
+          font: DEFAULT_FONT,
           color: "666666",
         }),
       ],
@@ -196,13 +239,13 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
     new Paragraph({
       alignment: AlignmentType.CENTER,
       children: [
-        new TextRun({ text: "Page i", size: 18, font: "Arial" }),
+        new TextRun({ text: "Page i", size: 18, font: DEFAULT_FONT }),
       ],
     }),
     new Paragraph({
       alignment: AlignmentType.CENTER,
       children: [
-        new TextRun({ text: "Confidential", size: 18, font: "Arial", color: "666666" }),
+        new TextRun({ text: "Confidential", size: 18, font: DEFAULT_FONT, color: "666666" }),
       ],
     }),
     new Paragraph({ children: [new PageBreak()] }),
@@ -211,28 +254,42 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
   // Statement of Confidentiality Section
   const confidentialitySection = [
     new Paragraph({
-      text: "Statement of Confidentiality",
-      heading: HeadingLevel.HEADING_1,
-      spacing: { before: 400, after: 200 },
+      children: [
+        new TextRun({
+          text: "Statement of Confidentiality",
+          bold: true,
+          size: 28,
+          color: HEADING_BLUE,
+          font: DEFAULT_FONT,
+        }),
+      ],
+      spacing: { before: 400, after: 300 },
     }),
     new Paragraph({
       children: [
         new TextRun({
           text: "The information contained in this document and related artefacts constitute confidential information of First Abu Dhabi Bank (FAB) and intended for internal usage purposes only. In consideration of receipt of this document, the recipient agrees to maintain such information as confidential and not to reproduce or otherwise disclose this information to any person outside the group directly responsible for evaluation of its contents, unless otherwise authorized by FAB in writing.",
           size: 22,
-          font: "Arial",
+          font: DEFAULT_FONT,
         }),
       ],
       spacing: { after: 600 },
     }),
     // Revision Sheet
     new Paragraph({
-      text: "Revision Sheet",
-      heading: HeadingLevel.HEADING_1,
-      spacing: { before: 400, after: 200 },
+      children: [
+        new TextRun({
+          text: "Revision Sheet",
+          bold: true,
+          size: 28,
+          color: HEADING_BLUE,
+          font: DEFAULT_FONT,
+        }),
+      ],
+      spacing: { before: 400, after: 300 },
     }),
     new Paragraph({
-      children: [new TextRun({ text: "Change Record", bold: true, size: 24, font: "Arial" })],
+      children: [new TextRun({ text: "Change Record", bold: true, size: 24, font: DEFAULT_FONT })],
       spacing: { after: 200 },
     }),
     new Paragraph({
@@ -242,7 +299,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           bold: true,
           underline: {},
           size: 22,
-          font: "Arial",
+          font: DEFAULT_FONT,
         }),
       ],
       spacing: { after: 100 },
@@ -253,7 +310,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "Version should start with 0.1 and increment by 0.1 for all drafts. The published version should be 1.0, In case of any changes post sign off, the version number should start with 1.1 and published version must be 2.0 or the next available sequence.",
           italics: true,
           size: 20,
-          font: "Arial",
+          font: DEFAULT_FONT,
         }),
       ],
       spacing: { after: 300 },
@@ -303,7 +360,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           bold: isMainSection,
           italics: isMainSection,
           size: 22,
-          font: "Arial",
+          font: DEFAULT_FONT,
           color: TOC_GREEN,
         }),
         new TextRun({
@@ -315,12 +372,12 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           bold: isMainSection,
           italics: isMainSection,
           size: 22,
-          font: "Arial",
+          font: DEFAULT_FONT,
           color: TOC_GREEN,
         }),
       ],
       indent: { left: indent },
-      spacing: { after: 140 },
+      spacing: { after: 180 },
     });
   };
 
@@ -333,7 +390,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "Table of Contents",
           bold: true,
           size: 32,
-          font: "Arial",
+          font: DEFAULT_FONT,
           color: TOC_GREEN,
         }),
       ],
@@ -365,8 +422,8 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "1. BUSINESS REQUIREMENTS",
           bold: true,
           size: 28,
-          color: BLACK,
-          font: "Arial",
+          color: HEADING_BLUE,
+          font: DEFAULT_FONT,
         }),
       ],
       spacing: { before: 400, after: 300 },
@@ -377,7 +434,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "(This is a listing of all business requirements such as: processes requirements, products requirements, services requirements, reporting Requirements, security requirements and workflow requirements where applicable.)",
           italics: true,
           size: 20,
-          font: "Arial",
+          font: DEFAULT_FONT,
         }),
       ],
       spacing: { after: 400 },
@@ -431,14 +488,14 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "2. EXECUTIVE SUMMARY",
           bold: true,
           size: 28,
-          color: BLACK,
-          font: "Arial",
+          color: HEADING_BLUE,
+          font: DEFAULT_FONT,
         }),
       ],
       spacing: { before: 400, after: 300 },
     }),
     new Paragraph({
-      children: [new TextRun({ text: parsedBRD.executiveSummary, size: 22, font: "Arial" })],
+      children: [new TextRun({ text: parsedBRD.executiveSummary, size: 22, font: DEFAULT_FONT })],
       spacing: { after: 400 },
     }),
     new Paragraph({ children: [new PageBreak()] }),
@@ -452,8 +509,8 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "3. PROJECT OVERVIEW",
           bold: true,
           size: 28,
-          color: BLACK,
-          font: "Arial",
+          color: HEADING_BLUE,
+          font: DEFAULT_FONT,
         }),
       ],
       spacing: { before: 400, after: 300 },
@@ -465,14 +522,14 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "3.1 Project Background",
           bold: true,
           size: 24,
-          color: BLACK,
-          font: "Arial",
+          color: HEADING_BLUE,
+          font: DEFAULT_FONT,
         }),
       ],
       spacing: { before: 300, after: 200 },
     }),
     new Paragraph({
-      children: [new TextRun({ text: parsedBRD.projectBackground, size: 22, font: "Arial" })],
+      children: [new TextRun({ text: parsedBRD.projectBackground, size: 22, font: DEFAULT_FONT })],
       spacing: { after: 300 },
     }),
     // 3.2 Project Purpose and Objectives
@@ -482,30 +539,30 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "3.2 Project Purpose and Objectives",
           bold: true,
           size: 24,
-          color: BLACK,
-          font: "Arial",
+          color: HEADING_BLUE,
+          font: DEFAULT_FONT,
         }),
       ],
       spacing: { before: 300, after: 200 },
     }),
     new Paragraph({
-      children: [new TextRun({ text: "Purpose:", bold: true, size: 22, font: "Arial" })],
+      children: [new TextRun({ text: "Purpose:", bold: true, size: 22, font: DEFAULT_FONT })],
       spacing: { after: 100 },
     }),
     new Paragraph({
-      children: [new TextRun({ text: parsedBRD.projectPurpose, size: 22, font: "Arial" })],
+      children: [new TextRun({ text: parsedBRD.projectPurpose, size: 22, font: DEFAULT_FONT })],
       spacing: { after: 200 },
     }),
     new Paragraph({
-      children: [new TextRun({ text: "Objectives:", bold: true, size: 22, font: "Arial" })],
+      children: [new TextRun({ text: "Objectives:", bold: true, size: 22, font: DEFAULT_FONT })],
       spacing: { after: 100 },
     }),
     ...parsedBRD.objectives.map(
       (obj) =>
         new Paragraph({
-          children: [new TextRun({ text: `• ${obj}`, size: 22, font: "Arial" })],
+          children: [new TextRun({ text: `• ${obj}`, size: 22, font: DEFAULT_FONT })],
           indent: { left: 360 },
-          spacing: { after: 50 },
+          spacing: { after: 80 },
         })
     ),
     // 3.3 Project Stakeholders
@@ -515,8 +572,8 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "3.3 Project Stakeholders",
           bold: true,
           size: 24,
-          color: BLACK,
-          font: "Arial",
+          color: HEADING_BLUE,
+          font: DEFAULT_FONT,
         }),
       ],
       spacing: { before: 300, after: 200 },
@@ -543,8 +600,8 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "3.4 Detailed Business Requirements",
           bold: true,
           size: 24,
-          color: BLACK,
-          font: "Arial",
+          color: HEADING_BLUE,
+          font: DEFAULT_FONT,
         }),
       ],
       spacing: { before: 400, after: 200 },
@@ -556,7 +613,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
             text: `${req.id} ${req.title}`,
             bold: true,
             size: 22,
-            font: "Arial",
+            font: DEFAULT_FONT,
           }),
         ],
         spacing: { before: 300, after: 100 },
@@ -567,13 +624,13 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
             text: `${req.id}.1 Business Need`,
             bold: true,
             size: 20,
-            font: "Arial",
+            font: DEFAULT_FONT,
           }),
         ],
         spacing: { before: 150 },
       }),
       new Paragraph({
-        children: [new TextRun({ text: req.businessNeed, size: 22, font: "Arial" })],
+        children: [new TextRun({ text: req.businessNeed, size: 22, font: DEFAULT_FONT })],
         spacing: { after: 150 },
       }),
       new Paragraph({
@@ -582,15 +639,16 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
             text: `${req.id}.2 Functional Requirements`,
             bold: true,
             size: 20,
-            font: "Arial",
+            font: DEFAULT_FONT,
           }),
         ],
       }),
       ...req.functionalRequirements.map(
         (fr) =>
           new Paragraph({
-            children: [new TextRun({ text: `• ${fr}`, size: 22, font: "Arial" })],
+            children: [new TextRun({ text: `• ${fr}`, size: 22, font: DEFAULT_FONT })],
             indent: { left: 360 },
+            spacing: { after: 60 },
           })
       ),
       new Paragraph({
@@ -599,7 +657,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
             text: `${req.id}.3 Non-Functional Requirements`,
             bold: true,
             size: 20,
-            font: "Arial",
+            font: DEFAULT_FONT,
           }),
         ],
         spacing: { before: 150 },
@@ -607,8 +665,9 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
       ...req.nonFunctionalRequirements.map(
         (nfr) =>
           new Paragraph({
-            children: [new TextRun({ text: `• ${nfr}`, size: 22, font: "Arial" })],
+            children: [new TextRun({ text: `• ${nfr}`, size: 22, font: DEFAULT_FONT })],
             indent: { left: 360 },
+            spacing: { after: 60 },
           })
       ),
       new Paragraph({
@@ -617,7 +676,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
             text: `${req.id}.4 Acceptance Criteria`,
             bold: true,
             size: 20,
-            font: "Arial",
+            font: DEFAULT_FONT,
           }),
         ],
         spacing: { before: 150 },
@@ -625,8 +684,9 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
       ...req.acceptanceCriteria.map(
         (ac) =>
           new Paragraph({
-            children: [new TextRun({ text: `• ${ac}`, size: 22, font: "Arial" })],
+            children: [new TextRun({ text: `• ${ac}`, size: 22, font: DEFAULT_FONT })],
             indent: { left: 360 },
+            spacing: { after: 60 },
           })
       ),
     ]),
@@ -641,8 +701,8 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "4. ASSUMPTIONS, DEPENDENCIES, AND CONSTRAINTS",
           bold: true,
           size: 28,
-          color: BLACK,
-          font: "Arial",
+          color: HEADING_BLUE,
+          font: DEFAULT_FONT,
         }),
       ],
       spacing: { before: 400, after: 300 },
@@ -653,8 +713,8 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "4.1 Assumptions",
           bold: true,
           size: 24,
-          color: BLACK,
-          font: "Arial",
+          color: HEADING_BLUE,
+          font: DEFAULT_FONT,
         }),
       ],
       spacing: { before: 200, after: 100 },
@@ -662,8 +722,9 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
     ...parsedBRD.assumptions.map(
       (a) =>
         new Paragraph({
-          children: [new TextRun({ text: `• ${a}`, size: 22, font: "Arial" })],
+          children: [new TextRun({ text: `• ${a}`, size: 22, font: DEFAULT_FONT })],
           indent: { left: 360 },
+          spacing: { after: 80 },
         })
     ),
     new Paragraph({
@@ -672,8 +733,8 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "4.2 Dependencies",
           bold: true,
           size: 24,
-          color: BLACK,
-          font: "Arial",
+          color: HEADING_BLUE,
+          font: DEFAULT_FONT,
         }),
       ],
       spacing: { before: 300, after: 100 },
@@ -681,8 +742,9 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
     ...parsedBRD.dependencies.map(
       (d) =>
         new Paragraph({
-          children: [new TextRun({ text: `• ${d}`, size: 22, font: "Arial" })],
+          children: [new TextRun({ text: `• ${d}`, size: 22, font: DEFAULT_FONT })],
           indent: { left: 360 },
+          spacing: { after: 80 },
         })
     ),
     new Paragraph({
@@ -691,8 +753,8 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "4.3 Constraints",
           bold: true,
           size: 24,
-          color: BLACK,
-          font: "Arial",
+          color: HEADING_BLUE,
+          font: DEFAULT_FONT,
         }),
       ],
       spacing: { before: 300, after: 100 },
@@ -700,8 +762,9 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
     ...parsedBRD.constraints.map(
       (c) =>
         new Paragraph({
-          children: [new TextRun({ text: `• ${c}`, size: 22, font: "Arial" })],
+          children: [new TextRun({ text: `• ${c}`, size: 22, font: DEFAULT_FONT })],
           indent: { left: 360 },
+          spacing: { after: 80 },
         })
     ),
     new Paragraph({ children: [new PageBreak()] }),
@@ -715,8 +778,8 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "5. PROJECT SCOPE",
           bold: true,
           size: 28,
-          color: BLACK,
-          font: "Arial",
+          color: HEADING_BLUE,
+          font: DEFAULT_FONT,
         }),
       ],
       spacing: { before: 400, after: 300 },
@@ -727,8 +790,8 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "5.1 In Scope",
           bold: true,
           size: 24,
-          color: BLACK,
-          font: "Arial",
+          color: HEADING_BLUE,
+          font: DEFAULT_FONT,
         }),
       ],
       spacing: { before: 200, after: 100 },
@@ -736,8 +799,9 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
     ...parsedBRD.inScope.map(
       (s) =>
         new Paragraph({
-          children: [new TextRun({ text: `• ${s}`, size: 22, font: "Arial" })],
+          children: [new TextRun({ text: `• ${s}`, size: 22, font: DEFAULT_FONT })],
           indent: { left: 360 },
+          spacing: { after: 80 },
         })
     ),
     new Paragraph({
@@ -746,8 +810,8 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "5.2 Out of Scope",
           bold: true,
           size: 24,
-          color: BLACK,
-          font: "Arial",
+          color: HEADING_BLUE,
+          font: DEFAULT_FONT,
         }),
       ],
       spacing: { before: 300, after: 100 },
@@ -755,8 +819,9 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
     ...parsedBRD.outOfScope.map(
       (s) =>
         new Paragraph({
-          children: [new TextRun({ text: `• ${s}`, size: 22, font: "Arial" })],
+          children: [new TextRun({ text: `• ${s}`, size: 22, font: DEFAULT_FONT })],
           indent: { left: 360 },
+          spacing: { after: 80 },
         })
     ),
     new Paragraph({ children: [new PageBreak()] }),
@@ -770,8 +835,8 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "6. CURRENT AND TARGET STATE ANALYSIS",
           bold: true,
           size: 28,
-          color: BLACK,
-          font: "Arial",
+          color: HEADING_BLUE,
+          font: DEFAULT_FONT,
         }),
       ],
       spacing: { before: 400, after: 300 },
@@ -782,22 +847,23 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "6.1 Current State Analysis",
           bold: true,
           size: 24,
-          color: BLACK,
-          font: "Arial",
+          color: HEADING_BLUE,
+          font: DEFAULT_FONT,
         }),
       ],
       spacing: { before: 200, after: 100 },
     }),
     ...parsedBRD.currentState.flatMap((cs) => [
       new Paragraph({
-        children: [new TextRun({ text: `${cs.section}:`, bold: true, size: 22, font: "Arial" })],
-        spacing: { before: 150 },
+        children: [new TextRun({ text: `${cs.section}:`, bold: true, size: 22, font: DEFAULT_FONT })],
+        spacing: { before: 150, after: 80 },
       }),
       ...cs.items.map(
         (item) =>
           new Paragraph({
-            children: [new TextRun({ text: `• ${item}`, size: 22, font: "Arial" })],
+            children: [new TextRun({ text: `• ${item}`, size: 22, font: DEFAULT_FONT })],
             indent: { left: 360 },
+            spacing: { after: 60 },
           })
       ),
     ]),
@@ -807,22 +873,23 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "6.2 Target State Analysis",
           bold: true,
           size: 24,
-          color: BLACK,
-          font: "Arial",
+          color: HEADING_BLUE,
+          font: DEFAULT_FONT,
         }),
       ],
       spacing: { before: 300, after: 100 },
     }),
     ...parsedBRD.targetState.flatMap((ts) => [
       new Paragraph({
-        children: [new TextRun({ text: `${ts.section}:`, bold: true, size: 22, font: "Arial" })],
-        spacing: { before: 150 },
+        children: [new TextRun({ text: `${ts.section}:`, bold: true, size: 22, font: DEFAULT_FONT })],
+        spacing: { before: 150, after: 80 },
       }),
       ...ts.items.map(
         (item) =>
           new Paragraph({
-            children: [new TextRun({ text: `• ${item}`, size: 22, font: "Arial" })],
+            children: [new TextRun({ text: `• ${item}`, size: 22, font: DEFAULT_FONT })],
             indent: { left: 360 },
+            spacing: { after: 60 },
           })
       ),
     ]),
@@ -837,8 +904,8 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "7. APPENDICES",
           bold: true,
           size: 28,
-          color: BLACK,
-          font: "Arial",
+          color: HEADING_BLUE,
+          font: DEFAULT_FONT,
         }),
       ],
       spacing: { before: 400, after: 300 },
@@ -849,8 +916,8 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "7.1 Appendix I - Definitions, Acronyms, and Abbreviations",
           bold: true,
           size: 24,
-          color: BLACK,
-          font: "Arial",
+          color: HEADING_BLUE,
+          font: DEFAULT_FONT,
         }),
       ],
       spacing: { before: 200, after: 200 },
@@ -861,7 +928,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "This subsection provides the definitions of all terms, acronyms, and abbreviations required to properly interpret the BRD.",
           italics: true,
           size: 20,
-          font: "Arial",
+          font: DEFAULT_FONT,
         }),
       ],
       spacing: { after: 200 },
@@ -887,8 +954,8 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "7.2 Appendix II - Reference Material",
           bold: true,
           size: 24,
-          color: BLACK,
-          font: "Arial",
+          color: HEADING_BLUE,
+          font: DEFAULT_FONT,
         }),
       ],
       spacing: { before: 400, after: 200 },
@@ -919,8 +986,8 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "8. SIGN OFF / ACKNOWLEDGEMENT",
           bold: true,
           size: 28,
-          color: BLACK,
-          font: "Arial",
+          color: HEADING_BLUE,
+          font: DEFAULT_FONT,
         }),
       ],
       spacing: { before: 400, after: 300 },
@@ -931,7 +998,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           text: "Approval Sign-off",
           bold: true,
           size: 24,
-          font: "Arial",
+          font: DEFAULT_FONT,
         }),
       ],
       spacing: { after: 200 },
@@ -969,8 +1036,8 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           run: {
             size: 28,
             bold: true,
-            color: BLACK,
-            font: "Arial",
+            color: HEADING_BLUE,
+            font: DEFAULT_FONT,
           },
           paragraph: {
             spacing: { before: 400, after: 200 },
@@ -980,8 +1047,8 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
           run: {
             size: 24,
             bold: true,
-            color: BLACK,
-            font: "Arial",
+            color: HEADING_BLUE,
+            font: DEFAULT_FONT,
           },
           paragraph: {
             spacing: { before: 300, after: 150 },
@@ -1002,7 +1069,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
                     text: "Classified: Internal | FAB Internal",
                     size: 16,
                     color: "666666",
-                    font: "Arial",
+                    font: DEFAULT_FONT,
                   }),
                 ],
               }),
@@ -1033,7 +1100,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
                                 text: parsedBRD.title,
                                 italics: true,
                                 size: 18,
-                                font: "Arial",
+                                font: DEFAULT_FONT,
                               }),
                             ],
                           }),
@@ -1048,7 +1115,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
                               new TextRun({
                                 text: "Confidential",
                                 size: 18,
-                                font: "Arial",
+                                font: DEFAULT_FONT,
                               }),
                             ],
                           }),
@@ -1063,7 +1130,7 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
                               new TextRun({
                                 text: "Business Requirements Document",
                                 size: 18,
-                                font: "Arial",
+                                font: DEFAULT_FONT,
                               }),
                             ],
                           }),
