@@ -3,11 +3,10 @@ import { Download, Upload, FileText, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { uploadFiles } from "@/services/projectApi";
+import { uploadFiles, downloadBRD } from "@/services/projectApi";
 import { createOrUpdateConfluencePage } from "@/services/confluenceApi";
 import { useAppState } from "@/contexts/AppStateContext";
 import { useNavigate } from "react-router-dom";
-import { generateBRDWord, type ParsedBRD } from "@/utils/brdWordGenerator";
 
 interface UploadedFile {
   id: string;
@@ -170,178 +169,6 @@ export const FileUploadSection = ({ onUploadSuccess }: FileUploadSectionProps) =
     }
   };
 
-  const parseContentPreviewToBRD = (contentPreview: string): ParsedBRD => {
-    const projectName = selectedProject?.project_name || "Project";
-    const currentDate = new Date().toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-
-    // Parse sections from contentPreview
-    const sections = contentPreview.split(/##\s+/).filter(Boolean);
-    
-    let executiveSummary = "";
-    let projectBackground = "";
-    let projectPurpose = "";
-    const objectives: string[] = [];
-    const stakeholders: { role: string; name: string }[] = [];
-    const requirements: ParsedBRD["requirements"] = [];
-    const assumptions: string[] = [];
-    const dependencies: string[] = [];
-    const constraints: string[] = [];
-    const inScope: string[] = [];
-    const outOfScope: string[] = [];
-    const currentState: { section: string; items: string[] }[] = [];
-    const targetState: { section: string; items: string[] }[] = [];
-    const definitions: { term: string; description: string }[] = [];
-    const references: { title: string; location: string }[] = [];
-    const signOff: { name: string; role: string }[] = [];
-
-    sections.forEach((section) => {
-      const lines = section.split("\n").map((l) => l.trim()).filter(Boolean);
-      const title = lines[0]?.replace(/^\d+\.\s*/, "").trim().toLowerCase() || "";
-      const content = lines.slice(1).join("\n");
-
-      if (title.includes("executive summary") || title.includes("overview")) {
-        executiveSummary = content;
-      } else if (title.includes("background")) {
-        projectBackground = content;
-      } else if (title.includes("purpose") || title.includes("objective")) {
-        if (title.includes("objective")) {
-          content.split("\n").forEach((line) => {
-            const cleaned = line.replace(/^[-•*]\s*/, "").trim();
-            if (cleaned) objectives.push(cleaned);
-          });
-        } else {
-          projectPurpose = content;
-        }
-      } else if (title.includes("stakeholder")) {
-        content.split("\n").forEach((line) => {
-          const cleaned = line.replace(/^[-•*]\s*/, "").trim();
-          if (cleaned) {
-            const parts = cleaned.split(/[:\-–]/);
-            stakeholders.push({
-              role: parts[0]?.trim() || cleaned,
-              name: parts[1]?.trim() || "TBD",
-            });
-          }
-        });
-      } else if (title.includes("functional requirement") || title.includes("requirement")) {
-        const reqItems: string[] = [];
-        content.split("\n").forEach((line) => {
-          const cleaned = line.replace(/^[-•*]\s*/, "").trim();
-          if (cleaned) reqItems.push(cleaned);
-        });
-        if (reqItems.length > 0) {
-          requirements.push({
-            id: `REQ-${requirements.length + 1}`,
-            title: title.replace(/requirement[s]?/i, "").trim() || "Requirements",
-            businessNeed: reqItems[0] || "",
-            functionalRequirements: reqItems,
-            nonFunctionalRequirements: [],
-            acceptanceCriteria: [],
-          });
-        }
-      } else if (title.includes("assumption")) {
-        content.split("\n").forEach((line) => {
-          const cleaned = line.replace(/^[-•*]\s*/, "").trim();
-          if (cleaned) assumptions.push(cleaned);
-        });
-      } else if (title.includes("dependency") || title.includes("dependencies")) {
-        content.split("\n").forEach((line) => {
-          const cleaned = line.replace(/^[-•*]\s*/, "").trim();
-          if (cleaned) dependencies.push(cleaned);
-        });
-      } else if (title.includes("constraint")) {
-        content.split("\n").forEach((line) => {
-          const cleaned = line.replace(/^[-•*]\s*/, "").trim();
-          if (cleaned) constraints.push(cleaned);
-        });
-      } else if (title.includes("in scope") || title.includes("in-scope")) {
-        content.split("\n").forEach((line) => {
-          const cleaned = line.replace(/^[-•*]\s*/, "").trim();
-          if (cleaned) inScope.push(cleaned);
-        });
-      } else if (title.includes("out of scope") || title.includes("out-of-scope")) {
-        content.split("\n").forEach((line) => {
-          const cleaned = line.replace(/^[-•*]\s*/, "").trim();
-          if (cleaned) outOfScope.push(cleaned);
-        });
-      } else if (title.includes("current state")) {
-        const items: string[] = [];
-        content.split("\n").forEach((line) => {
-          const cleaned = line.replace(/^[-•*]\s*/, "").trim();
-          if (cleaned) items.push(cleaned);
-        });
-        if (items.length > 0) {
-          currentState.push({ section: "Current State", items });
-        }
-      } else if (title.includes("target state") || title.includes("future state")) {
-        const items: string[] = [];
-        content.split("\n").forEach((line) => {
-          const cleaned = line.replace(/^[-•*]\s*/, "").trim();
-          if (cleaned) items.push(cleaned);
-        });
-        if (items.length > 0) {
-          targetState.push({ section: "Target State", items });
-        }
-      } else if (title.includes("definition") || title.includes("glossary")) {
-        content.split("\n").forEach((line) => {
-          const cleaned = line.replace(/^[-•*]\s*/, "").trim();
-          if (cleaned) {
-            const parts = cleaned.split(/[:\-–]/);
-            definitions.push({
-              term: parts[0]?.trim() || cleaned,
-              description: parts.slice(1).join(":").trim() || "",
-            });
-          }
-        });
-      } else if (title.includes("reference")) {
-        content.split("\n").forEach((line) => {
-          const cleaned = line.replace(/^[-•*]\s*/, "").trim();
-          if (cleaned) {
-            references.push({ title: cleaned, location: "" });
-          }
-        });
-      } else if (title.includes("sign") || title.includes("approval")) {
-        content.split("\n").forEach((line) => {
-          const cleaned = line.replace(/^[-•*]\s*/, "").trim();
-          if (cleaned) {
-            const parts = cleaned.split(/[:\-–]/);
-            signOff.push({
-              name: parts[1]?.trim() || "TBD",
-              role: parts[0]?.trim() || cleaned,
-            });
-          }
-        });
-      }
-    });
-
-    return {
-      title: projectName,
-      version: "1.0",
-      date: currentDate,
-      owner: "FAB",
-      executiveSummary: executiveSummary || "Executive summary to be completed.",
-      projectBackground: projectBackground || "Project background to be completed.",
-      projectPurpose: projectPurpose || "Project purpose to be completed.",
-      objectives: objectives.length > 0 ? objectives : ["Objectives to be defined"],
-      stakeholders: stakeholders.length > 0 ? stakeholders : [{ role: "Project Manager", name: "TBD" }],
-      requirements,
-      assumptions: assumptions.length > 0 ? assumptions : ["Assumptions to be defined"],
-      dependencies: dependencies.length > 0 ? dependencies : ["Dependencies to be defined"],
-      constraints: constraints.length > 0 ? constraints : ["Constraints to be defined"],
-      inScope: inScope.length > 0 ? inScope : ["Scope items to be defined"],
-      outOfScope: outOfScope.length > 0 ? outOfScope : ["Out of scope items to be defined"],
-      currentState,
-      targetState,
-      definitions,
-      references,
-      signOff: signOff.length > 0 ? signOff : [{ name: "TBD", role: "Project Sponsor" }],
-    };
-  };
-
   const handleDownloadBRD = async () => {
     if (uploadedFileBatches.length === 0) {
       toast({
@@ -367,8 +194,18 @@ export const FileUploadSection = ({ onUploadSuccess }: FileUploadSectionProps) =
 
     setIsBRDDownloading(true);
     try {
-      const parsedBRD = parseContentPreviewToBRD(contentPreview);
-      await generateBRDWord(parsedBRD);
+      const filename = `BRD_${selectedProject?.project_name || "Document"}.docx`;
+      const blob = await downloadBRD(contentPreview, filename);
+
+      // Create blob URL and trigger download
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
 
       toast({
         title: "BRD downloaded",
