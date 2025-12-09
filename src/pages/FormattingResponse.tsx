@@ -4,7 +4,231 @@ import { Download } from "lucide-react";
 import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, AlignmentType, HeadingLevel } from "docx";
 import { saveAs } from "file-saver";
 import { useAppState } from "@/contexts/AppStateContext";
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
+
+// Sample BRD response that simulates API response
+const sampleBRDResponse = `**BUSINESS REQUIREMENTS DOCUMENT**
+**Project Title:** Payments Platform Enhancement - Q4 Release
+**Document Version:** 1.0  
+**Document Date:** December 7, 2025  
+**Document Owner:** Priya (Product Manager)
+---
+**1. EXECUTIVE SUMMARY**
+This Business Requirements Document outlines the functional and technical requirements for the Payments Platform Enhancement release scheduled for Q4 2025. The project aims to address critical client feedback and operational issues by implementing four major capabilities: hourly settlement reporting, integrated dispute resolution, multi-currency support, and instant refunds. These enhancements will improve merchant experience, reduce support overhead, and expand market reach.
+---
+**2. PROJECT OVERVIEW**
+**2.1 Project Background**  
+The current payments platform has received consistent feedback from multiple clients regarding limitations in settlement reporting frequency, dispute resolution processes, currency support, and refund processing timelines. These limitations impact merchant operational efficiency and customer satisfaction.
+**2.2 Project Purpose and Objectives**
+**Purpose:**  
+To enhance the payments platform capabilities by implementing near real-time reporting, streamlined dispute management, expanded currency support, and instant refund processing to improve merchant experience and operational efficiency.
+**Objectives:**
+- Implement near real-time settlement reporting with hourly updates
+- Provide integrated dispute resolution tracking within the platform
+- Expand currency support to include AUD, CAD, and SGD
+- Enable instant refunds for eligible transactions through supported processors
+**2.3 Project Stakeholders**
+- Business Owner: Priya (Product Manager)
+- Lead Developer: Rohan
+- Payments Specialist: Amit
+- UX Designer: Meera
+- QA Lead: Sanjay
+- Business Analyst: Kavita
+---
+**3. BUSINESS REQUIREMENTS**
+**3.1 Requirement 1: Hourly Settlement Reporting**
+**3.1.1 Business Need**  
+Merchants currently operate on outdated financial figures due to daily batch reporting at 2 AM. They require near real-time visibility into settlement data to make informed business decisions throughout the day.
+**3.1.2 Functional Requirements**
+- Generate settlement reports on an hourly basis instead of daily
+- Implement streaming event architecture to replace batch processing jobs
+- Provide dashboard auto-refresh capability every few minutes
+- Display "last updated" timestamp indicator on reporting interface
+- Deliver incremental updates without table locking or processing delays
+**3.1.3 Non-Functional Requirements**
+- Define clear SLAs for update frequency
+- Ensure database queries handle incremental updates efficiently
+- Maintain system performance during continuous data streaming
+**3.1.4 Acceptance Criteria**
+- Settlement data updates appear within the defined hourly window
+- Dashboard refreshes automatically without manual user intervention
+- Last updated timestamp displays accurately
+- System maintains performance under continuous update load
+- QA validates continuous data flow and verifies correct reflection of updates including delayed or partially processed records
+---
+**3.2 Requirement 2: Integrated Dispute Resolution**
+**3.2.1 Business Need**  
+Current dispute resolution process requires merchants to submit forms via email, resulting in slow processing, lack of visibility, and excessive support calls for status updates.
+**3.2.2 Functional Requirements**
+- Build in-platform dispute management tool
+- Enable merchants to submit disputes with supporting evidence
+- Implement status tracking: "Received," "Under Review," "Resolved"
+- Provide secure document upload capability for PDF files
+- Display progress indicators with estimated resolution times
+- Enable direct communication within the platform
+**3.2.3 Non-Functional Requirements**
+- Ensure secure document storage and transmission
+- Maintain audit trail for all dispute activities
+- Provide notification system for status updates
+**3.2.4 Acceptance Criteria**
+- Merchants can submit disputes with supporting documentation
+- Status tracking accurately reflects dispute progression
+- Document upload supports PDF format with appropriate security
+- Support call volume for dispute status inquiries decreases
+- Estimated resolution times display accurately
+---
+**3.3 Requirement 3: Multi-Currency Support**
+**3.3.1 Business Need**  
+Current platform supports only USD, EUR, and GBP, limiting merchant reach in key markets including Australia, Canada, and Singapore.
+**3.3.2 Functional Requirements**
+- Add support for AUD (Australian Dollar), CAD (Canadian Dollar), and SGD (Singapore Dollar)
+- Integrate FX rate API with daily/hourly refresh capability
+- Implement currency selector for report viewing
+- Provide accurate locale-specific number and currency formatting
+- Display historical exchange rate information
+**3.3.3 Non-Functional Requirements**
+- Ensure FX rate accuracy and reliability
+- Maintain performance with additional currency processing
+- Comply with local currency regulations and standards
+**3.3.4 Acceptance Criteria**
+- All three new currencies (AUD, CAD, SGD) are fully supported
+- FX rates update according to configured refresh schedule
+- Currency display and formatting matches locale standards
+- Reports accurately reflect multi-currency transactions
+- Historical exchange rates are accessible for auditing
+---
+**3.4 Requirement 4: Instant Refunds**
+**3.4.1 Business Need**  
+Current refund processing takes one to two days, leading to customer dissatisfaction and increased support inquiries. Instant refund capability improves customer experience and reduces operational overhead.
+**3.4.2 Functional Requirements**
+- Enable instant refund processing for supported payment processors
+- Implement automated detection of instant refund capability
+- Provide confirmation workflow for instant refunds
+- Display clear messaging when instant refunds are not available
+- Maintain fallback to standard refund processing when necessary
+**3.4.3 Non-Functional Requirements**
+- Ensure transaction security and fraud prevention
+- Maintain compliance with payment processor requirements
+- Provide real-time processing without system degradation
+**3.4.4 Acceptance Criteria**
+- Instant refunds process within defined timeframe for supported processors
+- System correctly identifies instant refund eligibility
+- Confirmation workflows function properly
+- Clear messaging displays for non-eligible transactions
+- Fallback to standard processing works seamlessly
+---
+**4. ASSUMPTIONS, DEPENDENCIES, AND CONSTRAINTS**
+**4.1 Assumptions**
+- Payment processor APIs support required instant refund functionality
+- FX rate provider can deliver reliable hourly rate updates
+- Current infrastructure can support streaming architecture implementation
+- Merchant user base will adopt new dispute resolution workflow
+**4.2 Dependencies**
+- FX provider contract finalization and API access
+- Payment processor certification for instant refund capability
+- Infrastructure upgrades for streaming event processing
+- UX design completion for dispute management interface
+**4.3 Constraints**
+- Q4 2025 release timeline
+- Budget allocation for FX provider integration
+- Existing payment processor contractual limitations
+- Data retention policies for settlement reporting
+---
+**5. PROJECT SCOPE**
+**5.1 In Scope**
+- Hourly settlement reporting implementation
+- Integrated dispute resolution tool
+- Support for AUD, CAD, and SGD currencies
+- Instant refund processing for eligible transactions
+- Dashboard auto-refresh functionality
+- Secure document upload capability
+- FX rate integration and display
+- Status tracking and notifications
+**5.2 Out of Scope**
+- Additional currencies beyond AUD, CAD, and SGD
+- Cryptocurrency support
+- Third-party dispute mediation services
+- Refund reversal capability for instant refunds
+- Mobile application enhancements
+- Historical data migration for settlement reports beyond current data retention
+---
+**6. CURRENT AND TARGET STATE ANALYSIS**
+**6.1 CURRENT STATE ANALYSIS**
+**Settlement Reporting:**
+- Reports generated once daily at 2 AM via batch processing
+- Merchants operate on outdated financial figures during business hours
+- No automatic dashboard refresh capability
+- Delayed visibility into settlement status
+**Dispute Resolution:**
+- Email-based form submission process
+- No visibility into dispute status
+- Manual follow-up required for updates
+- High volume of support calls
+**Currency Support:**
+- Limited to USD, EUR, and GBP
+- No FX rate integration
+- Restricted market reach
+**Refund Processing:**
+- Standard processing with one to two day delay
+- No instant refund capability
+- Customer dissatisfaction with refund timing
+**6.2 TARGET STATE ANALYSIS**
+**Settlement Reporting:**
+- Hourly report generation via streaming event architecture
+- Real-time operational visibility
+- Auto-refresh dashboard with timestamp indicators
+- Incremental updates without performance degradation
+**Dispute Resolution:**
+- In-platform dispute management tool
+- Status tracking with "Received," "Under Review," "Resolved" stages
+- Secure document upload capability
+- Progress indicators with estimated resolution times
+- Reduced support call volume
+**Currency Support:**
+- Support for USD, EUR, GBP, AUD, CAD, and SGD
+- Integrated FX rate API with daily/hourly refresh
+- Currency selector for report viewing
+- Accurate locale-specific formatting
+**Refund Processing:**
+- Instant refund capability for supported processors
+- Automated capability detection
+- Confirmation workflows
+- Improved customer satisfaction
+---
+**7. APPENDICES**
+**Appendix I - Definitions, Acronyms, and Abbreviations**
+| Term | Description |
+|------|-------------|
+| API | Application Programming Interface |
+| AUD | Australian Dollar |
+| BRD | Business Requirements Document |
+| CAD | Canadian Dollar |
+| EUR | Euro |
+| FX | Foreign Exchange |
+| GBP | British Pound Sterling |
+| PDF | Portable Document Format |
+| QA | Quality Assurance |
+| SGD | Singapore Dollar |
+| SLA | Service Level Agreement |
+| UI | User Interface |
+| USD | United States Dollar |
+**Appendix II - Reference Material**
+| Document Title | Location |
+|----------------|----------|
+| Client Feedback Survey Results | Internal Repository |
+| Payment Processor API Documentation | Vendor Portal |
+| FX Provider Integration Specifications | Pending Contract Finalization |
+| Template Document | uploads\\fab-sdlc-brd-template.docx |
+| Transcript File | uploads\\tmpelo751k7.txt |
+---
+**8. SIGN OFF / ACKNOWLEDGEMENT**
+**Approval Sign-off**
+| Name | Signature | Date |
+|------|-----------|------|
+| Business Owner: Priya (Product Manager) | | |
+| Service Owner: Amit (Payments Specialist) | | |
+| Delivery Head: Rohan (Lead Developer) | | |
+---`;
 
 interface ParsedBRD {
   title: string;
@@ -29,51 +253,42 @@ interface ParsedBRD {
   constraints: string[];
   inScope: string[];
   outOfScope: string[];
+  currentState: { section: string; items: string[] }[];
+  targetState: { section: string; items: string[] }[];
   definitions: { term: string; description: string }[];
   references: { title: string; location: string }[];
   signOff: { name: string; role: string }[];
 }
 
 const parseBRDContent = (rawContent: string): ParsedBRD => {
-  const lines = rawContent.split('\n');
-  
   // Extract header info
   const titleMatch = rawContent.match(/\*\*Project Title:\*\*\s*(.+)/);
   const versionMatch = rawContent.match(/\*\*Document Version:\*\*\s*(.+)/);
   const dateMatch = rawContent.match(/\*\*Document Date:\*\*\s*(.+)/);
   const ownerMatch = rawContent.match(/\*\*Document Owner:\*\*\s*(.+)/);
 
-  // Helper to extract section content
-  const extractSection = (startPattern: RegExp, endPattern: RegExp): string => {
-    const startIdx = lines.findIndex(l => startPattern.test(l));
-    if (startIdx === -1) return '';
-    const endIdx = lines.findIndex((l, i) => i > startIdx && endPattern.test(l));
-    const sectionLines = lines.slice(startIdx + 1, endIdx === -1 ? undefined : endIdx);
-    return sectionLines.filter(l => l.trim() && !l.startsWith('---')).join('\n').trim();
-  };
-
-  // Helper to extract bullet points
-  const extractBulletPoints = (content: string): string[] => {
-    return content.split('\n')
-      .filter(l => l.trim().startsWith('-') || l.trim().startsWith('•'))
-      .map(l => l.replace(/^[-•]\s*/, '').trim());
-  };
-
   // Extract executive summary
-  const execSummary = extractSection(/\*\*1\. EXECUTIVE SUMMARY\*\*/, /\*\*2\. PROJECT OVERVIEW\*\*/);
+  const execMatch = rawContent.match(/\*\*1\. EXECUTIVE SUMMARY\*\*\s*\n([\s\S]*?)(?=---|\*\*2\.)/);
+  const executiveSummary = execMatch ? execMatch[1].trim() : '';
 
   // Extract project background
-  const projectSection = extractSection(/\*\*2\. PROJECT OVERVIEW\*\*/, /\*\*3\. BUSINESS REQUIREMENTS\*\*/);
-  const backgroundMatch = projectSection.match(/\*\*2\.1 Project Background\*\*\s*\n([\s\S]*?)(?=\*\*2\.2|$)/);
-  const purposeMatch = projectSection.match(/\*\*Purpose:\*\*\s*\n([\s\S]*?)(?=\*\*Objectives:|$)/);
-  const objectivesMatch = projectSection.match(/\*\*Objectives:\*\*\s*\n([\s\S]*?)(?=\*\*2\.3|$)/);
-  const stakeholdersMatch = projectSection.match(/\*\*2\.3 Project Stakeholders\*\*\s*\n([\s\S]*?)$/);
+  const bgMatch = rawContent.match(/\*\*2\.1 Project Background\*\*\s*\n([\s\S]*?)(?=\*\*2\.2)/);
+  const projectBackground = bgMatch ? bgMatch[1].trim() : '';
 
-  // Parse stakeholders
+  // Extract purpose
+  const purposeMatch = rawContent.match(/\*\*Purpose:\*\*\s*\n([\s\S]*?)(?=\*\*Objectives:)/);
+  const projectPurpose = purposeMatch ? purposeMatch[1].trim() : '';
+
+  // Extract objectives
+  const objMatch = rawContent.match(/\*\*Objectives:\*\*\s*\n([\s\S]*?)(?=\*\*2\.3)/);
+  const objectives = objMatch ? objMatch[1].split('\n').filter(l => l.trim().startsWith('-')).map(l => l.replace(/^-\s*/, '').trim()) : [];
+
+  // Extract stakeholders
+  const stakeholderMatch = rawContent.match(/\*\*2\.3 Project Stakeholders\*\*\s*\n([\s\S]*?)(?=---|\*\*3\.)/);
   const stakeholders: { role: string; name: string }[] = [];
-  if (stakeholdersMatch) {
-    const stakeholderLines = stakeholdersMatch[1].split('\n').filter(l => l.trim().startsWith('-'));
-    stakeholderLines.forEach(line => {
+  if (stakeholderMatch) {
+    const lines = stakeholderMatch[1].split('\n').filter(l => l.trim().startsWith('-'));
+    lines.forEach(line => {
       const match = line.match(/-\s*(.+?):\s*(.+)/);
       if (match) {
         stakeholders.push({ role: match[1].trim(), name: match[2].trim() });
@@ -82,44 +297,83 @@ const parseBRDContent = (rawContent: string): ParsedBRD => {
   }
 
   // Extract requirements
-  const reqSection = extractSection(/\*\*3\. BUSINESS REQUIREMENTS\*\*/, /\*\*4\. ASSUMPTIONS/);
   const requirements: ParsedBRD['requirements'] = [];
-  
-  const reqMatches = reqSection.matchAll(/\*\*3\.(\d)\s+Requirement\s+\d+:\s*(.+?)\*\*\s*\n([\s\S]*?)(?=\*\*3\.\d|$)/g);
-  for (const match of reqMatches) {
-    const reqContent = match[3];
-    const businessNeedMatch = reqContent.match(/\*\*3\.\d\.1 Business Need\*\*\s*\n([\s\S]*?)(?=\*\*3\.\d\.2|$)/);
-    const funcReqMatch = reqContent.match(/\*\*3\.\d\.2 Functional Requirements\*\*\s*\n([\s\S]*?)(?=\*\*3\.\d\.3|$)/);
-    const nonFuncReqMatch = reqContent.match(/\*\*3\.\d\.3 Non-Functional Requirements\*\*\s*\n([\s\S]*?)(?=\*\*3\.\d\.4|$)/);
-    const acceptMatch = reqContent.match(/\*\*3\.\d\.4 Acceptance Criteria\*\*\s*\n([\s\S]*?)$/);
+  const reqPattern = /\*\*3\.(\d) Requirement \d+: (.+?)\*\*\s*\n([\s\S]*?)(?=\*\*3\.\d Requirement|\*\*4\.)/g;
+  let reqMatch;
+  while ((reqMatch = reqPattern.exec(rawContent)) !== null) {
+    const reqContent = reqMatch[3];
+    const id = `3.${reqMatch[1]}`;
+    const title = reqMatch[2].trim();
+    
+    const bnMatch = reqContent.match(/\*\*3\.\d\.1 Business Need\*\*\s*\n([\s\S]*?)(?=\*\*3\.\d\.2)/);
+    const frMatch = reqContent.match(/\*\*3\.\d\.2 Functional Requirements\*\*\s*\n([\s\S]*?)(?=\*\*3\.\d\.3)/);
+    const nfrMatch = reqContent.match(/\*\*3\.\d\.3 Non-Functional Requirements\*\*\s*\n([\s\S]*?)(?=\*\*3\.\d\.4)/);
+    const acMatch = reqContent.match(/\*\*3\.\d\.4 Acceptance Criteria\*\*\s*\n([\s\S]*?)(?=---|$)/);
 
     requirements.push({
-      id: `3.${match[1]}`,
-      title: match[2].trim(),
-      businessNeed: businessNeedMatch ? businessNeedMatch[1].trim() : '',
-      functionalRequirements: funcReqMatch ? extractBulletPoints(funcReqMatch[1]) : [],
-      nonFunctionalRequirements: nonFuncReqMatch ? extractBulletPoints(nonFuncReqMatch[1]) : [],
-      acceptanceCriteria: acceptMatch ? extractBulletPoints(acceptMatch[1]) : [],
+      id,
+      title,
+      businessNeed: bnMatch ? bnMatch[1].trim() : '',
+      functionalRequirements: frMatch ? frMatch[1].split('\n').filter(l => l.trim().startsWith('-')).map(l => l.replace(/^-\s*/, '').trim()) : [],
+      nonFunctionalRequirements: nfrMatch ? nfrMatch[1].split('\n').filter(l => l.trim().startsWith('-')).map(l => l.replace(/^-\s*/, '').trim()) : [],
+      acceptanceCriteria: acMatch ? acMatch[1].split('\n').filter(l => l.trim().startsWith('-')).map(l => l.replace(/^-\s*/, '').trim()) : [],
     });
   }
 
-  // Extract assumptions, dependencies, constraints
-  const adcSection = extractSection(/\*\*4\. ASSUMPTIONS, DEPENDENCIES, AND CONSTRAINTS\*\*/, /\*\*5\. PROJECT SCOPE\*\*/);
-  const assumptionsMatch = adcSection.match(/\*\*4\.1 Assumptions\*\*\s*\n([\s\S]*?)(?=\*\*4\.2|$)/);
-  const dependenciesMatch = adcSection.match(/\*\*4\.2 Dependencies\*\*\s*\n([\s\S]*?)(?=\*\*4\.3|$)/);
-  const constraintsMatch = adcSection.match(/\*\*4\.3 Constraints\*\*\s*\n([\s\S]*?)$/);
+  // Extract assumptions
+  const assumpMatch = rawContent.match(/\*\*4\.1 Assumptions\*\*\s*\n([\s\S]*?)(?=\*\*4\.2)/);
+  const assumptions = assumpMatch ? assumpMatch[1].split('\n').filter(l => l.trim().startsWith('-')).map(l => l.replace(/^-\s*/, '').trim()) : [];
 
-  // Extract scope
-  const scopeSection = extractSection(/\*\*5\. PROJECT SCOPE\*\*/, /\*\*6\. CURRENT AND TARGET STATE/);
-  const inScopeMatch = scopeSection.match(/\*\*5\.1 In Scope\*\*\s*\n([\s\S]*?)(?=\*\*5\.2|$)/);
-  const outScopeMatch = scopeSection.match(/\*\*5\.2 Out of Scope\*\*\s*\n([\s\S]*?)$/);
+  // Extract dependencies
+  const depMatch = rawContent.match(/\*\*4\.2 Dependencies\*\*\s*\n([\s\S]*?)(?=\*\*4\.3)/);
+  const dependencies = depMatch ? depMatch[1].split('\n').filter(l => l.trim().startsWith('-')).map(l => l.replace(/^-\s*/, '').trim()) : [];
 
-  // Extract definitions from appendix
+  // Extract constraints
+  const constMatch = rawContent.match(/\*\*4\.3 Constraints\*\*\s*\n([\s\S]*?)(?=---|\*\*5\.)/);
+  const constraints = constMatch ? constMatch[1].split('\n').filter(l => l.trim().startsWith('-')).map(l => l.replace(/^-\s*/, '').trim()) : [];
+
+  // Extract in scope
+  const inScopeMatch = rawContent.match(/\*\*5\.1 In Scope\*\*\s*\n([\s\S]*?)(?=\*\*5\.2)/);
+  const inScope = inScopeMatch ? inScopeMatch[1].split('\n').filter(l => l.trim().startsWith('-')).map(l => l.replace(/^-\s*/, '').trim()) : [];
+
+  // Extract out of scope
+  const outScopeMatch = rawContent.match(/\*\*5\.2 Out of Scope\*\*\s*\n([\s\S]*?)(?=---|\*\*6\.)/);
+  const outOfScope = outScopeMatch ? outScopeMatch[1].split('\n').filter(l => l.trim().startsWith('-')).map(l => l.replace(/^-\s*/, '').trim()) : [];
+
+  // Extract current state
+  const currentState: { section: string; items: string[] }[] = [];
+  const currentStateMatch = rawContent.match(/\*\*6\.1 CURRENT STATE ANALYSIS\*\*\s*\n([\s\S]*?)(?=\*\*6\.2)/);
+  if (currentStateMatch) {
+    const sections = currentStateMatch[1].split(/\*\*([^*]+):\*\*/);
+    for (let i = 1; i < sections.length; i += 2) {
+      const sectionName = sections[i].trim();
+      const items = sections[i + 1]?.split('\n').filter(l => l.trim().startsWith('-')).map(l => l.replace(/^-\s*/, '').trim()) || [];
+      if (sectionName && items.length > 0) {
+        currentState.push({ section: sectionName, items });
+      }
+    }
+  }
+
+  // Extract target state
+  const targetState: { section: string; items: string[] }[] = [];
+  const targetStateMatch = rawContent.match(/\*\*6\.2 TARGET STATE ANALYSIS\*\*\s*\n([\s\S]*?)(?=---|\*\*7\.)/);
+  if (targetStateMatch) {
+    const sections = targetStateMatch[1].split(/\*\*([^*]+):\*\*/);
+    for (let i = 1; i < sections.length; i += 2) {
+      const sectionName = sections[i].trim();
+      const items = sections[i + 1]?.split('\n').filter(l => l.trim().startsWith('-')).map(l => l.replace(/^-\s*/, '').trim()) || [];
+      if (sectionName && items.length > 0) {
+        targetState.push({ section: sectionName, items });
+      }
+    }
+  }
+
+  // Extract definitions
   const definitions: { term: string; description: string }[] = [];
-  const defTableMatch = rawContent.match(/\| Term \| Description \|[\s\S]*?(?=\*\*Appendix II|\*\*8\.)/);
-  if (defTableMatch) {
-    const tableRows = defTableMatch[0].split('\n').filter(l => l.startsWith('|') && !l.includes('Term') && !l.includes('---'));
-    tableRows.forEach(row => {
+  const defMatch = rawContent.match(/\| Term \| Description \|\s*\n\|[-|]+\|\s*\n([\s\S]*?)(?=\*\*Appendix II)/);
+  if (defMatch) {
+    const rows = defMatch[1].split('\n').filter(l => l.trim().startsWith('|'));
+    rows.forEach(row => {
       const cells = row.split('|').filter(c => c.trim());
       if (cells.length >= 2) {
         definitions.push({ term: cells[0].trim(), description: cells[1].trim() });
@@ -129,10 +383,10 @@ const parseBRDContent = (rawContent: string): ParsedBRD => {
 
   // Extract references
   const references: { title: string; location: string }[] = [];
-  const refTableMatch = rawContent.match(/\| Document Title \| Location \|[\s\S]*?(?=\*\*8\.)/);
-  if (refTableMatch) {
-    const tableRows = refTableMatch[0].split('\n').filter(l => l.startsWith('|') && !l.includes('Document Title') && !l.includes('---'));
-    tableRows.forEach(row => {
+  const refMatch = rawContent.match(/\| Document Title \| Location \|\s*\n\|[-|]+\|\s*\n([\s\S]*?)(?=---|\*\*8\.)/);
+  if (refMatch) {
+    const rows = refMatch[1].split('\n').filter(l => l.trim().startsWith('|'));
+    rows.forEach(row => {
       const cells = row.split('|').filter(c => c.trim());
       if (cells.length >= 2) {
         references.push({ title: cells[0].trim(), location: cells[1].trim() });
@@ -142,10 +396,10 @@ const parseBRDContent = (rawContent: string): ParsedBRD => {
 
   // Extract sign-off
   const signOff: { name: string; role: string }[] = [];
-  const signOffMatch = rawContent.match(/\*\*Approval Sign-off\*\*[\s\S]*?\| Name \| Signature \| Date \|[\s\S]*$/);
-  if (signOffMatch) {
-    const tableRows = signOffMatch[0].split('\n').filter(l => l.startsWith('|') && !l.includes('Name') && !l.includes('---'));
-    tableRows.forEach(row => {
+  const signMatch = rawContent.match(/\| Name \| Signature \| Date \|\s*\n\|[-|]+\|\s*\n([\s\S]*?)(?=---|$)/);
+  if (signMatch) {
+    const rows = signMatch[1].split('\n').filter(l => l.trim().startsWith('|'));
+    rows.forEach(row => {
       const cells = row.split('|').filter(c => c.trim());
       if (cells.length >= 1 && cells[0].includes(':')) {
         const parts = cells[0].split(':');
@@ -159,17 +413,19 @@ const parseBRDContent = (rawContent: string): ParsedBRD => {
     version: versionMatch?.[1]?.trim() || '1.0',
     date: dateMatch?.[1]?.trim() || new Date().toLocaleDateString(),
     owner: ownerMatch?.[1]?.trim() || 'Unknown',
-    executiveSummary: execSummary,
-    projectBackground: backgroundMatch?.[1]?.trim() || '',
-    projectPurpose: purposeMatch?.[1]?.trim() || '',
-    objectives: objectivesMatch ? extractBulletPoints(objectivesMatch[1]) : [],
+    executiveSummary,
+    projectBackground,
+    projectPurpose,
+    objectives,
     stakeholders,
     requirements,
-    assumptions: assumptionsMatch ? extractBulletPoints(assumptionsMatch[1]) : [],
-    dependencies: dependenciesMatch ? extractBulletPoints(dependenciesMatch[1]) : [],
-    constraints: constraintsMatch ? extractBulletPoints(constraintsMatch[1]) : [],
-    inScope: inScopeMatch ? extractBulletPoints(inScopeMatch[1]) : [],
-    outOfScope: outScopeMatch ? extractBulletPoints(outScopeMatch[1]) : [],
+    assumptions,
+    dependencies,
+    constraints,
+    inScope,
+    outOfScope,
+    currentState,
+    targetState,
     definitions,
     references,
     signOff,
@@ -177,7 +433,21 @@ const parseBRDContent = (rawContent: string): ParsedBRD => {
 };
 
 const FormattingResponse = () => {
-  const { brdResponseData } = useAppState();
+  const { brdResponseData, setBrdResponseData } = useAppState();
+
+  // Simulate API response on mount - in real scenario, this would come from an actual API
+  useEffect(() => {
+    if (!brdResponseData) {
+      // Simulate receiving response from API
+      setBrdResponseData({
+        title: "Payments Platform Enhancement - Q4 Release",
+        version: "1.0",
+        date: "December 7, 2025",
+        owner: "Priya (Product Manager)",
+        rawContent: sampleBRDResponse
+      });
+    }
+  }, [brdResponseData, setBrdResponseData]);
 
   const parsedBRD = useMemo(() => {
     if (!brdResponseData?.rawContent) return null;
@@ -381,6 +651,45 @@ const FormattingResponse = () => {
               })
             ),
             new Paragraph({
+              text: "6. CURRENT AND TARGET STATE ANALYSIS",
+              heading: HeadingLevel.HEADING_1,
+              spacing: { before: 400, after: 200 }
+            }),
+            new Paragraph({
+              text: "6.1 Current State Analysis",
+              heading: HeadingLevel.HEADING_2,
+              spacing: { before: 200, after: 100 }
+            }),
+            ...parsedBRD.currentState.flatMap(cs => [
+              new Paragraph({
+                children: [new TextRun({ text: `${cs.section}:`, bold: true, size: 22 })],
+                spacing: { before: 100 }
+              }),
+              ...cs.items.map(item => 
+                new Paragraph({
+                  children: [new TextRun({ text: `• ${item}`, size: 22 })],
+                  indent: { left: 360 }
+                })
+              )
+            ]),
+            new Paragraph({
+              text: "6.2 Target State Analysis",
+              heading: HeadingLevel.HEADING_2,
+              spacing: { before: 200, after: 100 }
+            }),
+            ...parsedBRD.targetState.flatMap(ts => [
+              new Paragraph({
+                children: [new TextRun({ text: `${ts.section}:`, bold: true, size: 22 })],
+                spacing: { before: 100 }
+              }),
+              ...ts.items.map(item => 
+                new Paragraph({
+                  children: [new TextRun({ text: `• ${item}`, size: 22 })],
+                  indent: { left: 360 }
+                })
+              )
+            ]),
+            new Paragraph({
               text: "7. APPENDICES",
               heading: HeadingLevel.HEADING_1,
               spacing: { before: 400, after: 200 }
@@ -413,6 +722,40 @@ const FormattingResponse = () => {
                       }),
                       new TableCell({
                         children: [new Paragraph({ children: [new TextRun({ text: def.description })] })]
+                      })
+                    ]
+                  })
+                )
+              ]
+            }),
+            new Paragraph({
+              text: "Appendix II - Reference Material",
+              heading: HeadingLevel.HEADING_2,
+              spacing: { before: 200, after: 100 }
+            }),
+            new Table({
+              width: { size: 100, type: WidthType.PERCENTAGE },
+              rows: [
+                new TableRow({
+                  children: [
+                    new TableCell({
+                      children: [new Paragraph({ children: [new TextRun({ text: "Document Title", bold: true })] })],
+                      width: { size: 50, type: WidthType.PERCENTAGE }
+                    }),
+                    new TableCell({
+                      children: [new Paragraph({ children: [new TextRun({ text: "Location", bold: true })] })],
+                      width: { size: 50, type: WidthType.PERCENTAGE }
+                    })
+                  ]
+                }),
+                ...parsedBRD.references.map(ref => 
+                  new TableRow({
+                    children: [
+                      new TableCell({
+                        children: [new Paragraph({ children: [new TextRun({ text: ref.title })] })]
+                      }),
+                      new TableCell({
+                        children: [new Paragraph({ children: [new TextRun({ text: ref.location })] })]
                       })
                     ]
                   })
@@ -471,7 +814,7 @@ const FormattingResponse = () => {
     saveAs(blob, fileName);
   };
 
-  if (!brdResponseData || !parsedBRD) {
+  if (!parsedBRD) {
     return (
       <MainLayout>
         <div className="p-6 max-w-5xl mx-auto">
@@ -479,9 +822,7 @@ const FormattingResponse = () => {
             Formatting Response
           </h1>
           <div className="bg-card rounded-lg border border-border p-8 text-center">
-            <p className="text-muted-foreground">
-              No BRD response available. Please generate a BRD from the BRD Assistant first.
-            </p>
+            <p className="text-muted-foreground">Loading BRD response...</p>
           </div>
         </div>
       </MainLayout>
@@ -691,6 +1032,48 @@ const FormattingResponse = () => {
                         <li key={idx}>{s}</li>
                       ))}
                     </ul>
+                  </div>
+                )}
+              </div>
+            </section>
+          )}
+
+          {/* Section 6: Current and Target State */}
+          {(parsedBRD.currentState.length > 0 || parsedBRD.targetState.length > 0) && (
+            <section className="mb-8">
+              <h3 className="text-lg font-bold mb-3 text-primary" style={{ fontFamily: 'Helvetica Neue' }}>
+                6. CURRENT AND TARGET STATE ANALYSIS
+              </h3>
+              
+              <div className="grid md:grid-cols-2 gap-4">
+                {parsedBRD.currentState.length > 0 && (
+                  <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+                    <h4 className="font-semibold mb-3 text-orange-700 dark:text-orange-400">6.1 Current State</h4>
+                    {parsedBRD.currentState.map((cs, idx) => (
+                      <div key={idx} className="mb-3">
+                        <p className="text-sm font-medium mb-1" style={{ color: '#3B3B3B' }}>{cs.section}:</p>
+                        <ul className="list-disc list-inside text-sm space-y-1 ml-2" style={{ color: '#3B3B3B' }}>
+                          {cs.items.map((item, iIdx) => (
+                            <li key={iIdx}>{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {parsedBRD.targetState.length > 0 && (
+                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <h4 className="font-semibold mb-3 text-blue-700 dark:text-blue-400">6.2 Target State</h4>
+                    {parsedBRD.targetState.map((ts, idx) => (
+                      <div key={idx} className="mb-3">
+                        <p className="text-sm font-medium mb-1" style={{ color: '#3B3B3B' }}>{ts.section}:</p>
+                        <ul className="list-disc list-inside text-sm space-y-1 ml-2" style={{ color: '#3B3B3B' }}>
+                          {ts.items.map((item, iIdx) => (
+                            <li key={iIdx}>{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
