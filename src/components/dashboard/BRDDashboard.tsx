@@ -1,12 +1,10 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { BRDProgress } from "../brd/BRDProgress";
 import { ChatInterface } from "../chat/ChatInterface";
 import { FileUploadSection } from "../files/FileUploadSection";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Download } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useAppState } from "@/contexts/AppStateContext";
-import { generateBRDWord, ParsedBRD } from "@/utils/brdWordGenerator";
-import { toast } from "sonner";
 const sectionContent = {
   "Executive Summary": {
     title: "Executive Summary Assistant",
@@ -64,10 +62,7 @@ export const BRDDashboard = ({
     setPendingUploadResponse,
     uploadedFileBatches,
     brdSections,
-    setBrdSections,
-    isBRDApproved,
-    brdResponseData,
-    setBrdResponseData
+    setBrdSections
   } = useAppState();
   const [selectedSection, setSelectedSection] = useState<string>("");
   const [completedSections, setCompletedSections] = useState<string[]>([]);
@@ -83,15 +78,6 @@ export const BRDDashboard = ({
   useEffect(() => {
     if (pendingUploadResponse) {
       const content = pendingUploadResponse.brd_auto_generated?.content_preview || pendingUploadResponse.message || 'File uploaded successfully';
-      
-      // Store raw content for Word download
-      setBrdResponseData({
-        title: contextProject?.project_name || 'BRD Document',
-        version: '1.0',
-        date: new Date().toLocaleDateString(),
-        owner: 'Document Owner',
-        rawContent: content
-      });
       
       // Parse the content to extract dynamic sections
       const parsedSections = parseBRDSections(content);
@@ -118,7 +104,7 @@ export const BRDDashboard = ({
       // Clear the pending response after adding to chat
       setPendingUploadResponse(null);
     }
-  }, [pendingUploadResponse, chatMessages.brd, setChatMessages, setPendingUploadResponse, setBrdSections, setBrdResponseData, contextProject]);
+  }, [pendingUploadResponse, chatMessages.brd, setChatMessages, setPendingUploadResponse, setBrdSections]);
 
   // Function to parse BRD sections from API response
   const parseBRDSections = (content: string) => {
@@ -224,198 +210,13 @@ export const BRDDashboard = ({
       setBrdSections(updatedSections);
     }
   };
-
-  // Parse BRD content to structured format for Word generation
-  const parseBRDContentForWord = (rawContent: string): ParsedBRD => {
-    const titleMatch = rawContent.match(/\*\*Project Title:\*\*\s*(.+)/);
-    const versionMatch = rawContent.match(/\*\*Document Version:\*\*\s*(.+)/);
-    const dateMatch = rawContent.match(/\*\*Document Date:\*\*\s*(.+)/);
-    const ownerMatch = rawContent.match(/\*\*Document Owner:\*\*\s*(.+)/);
-
-    const execMatch = rawContent.match(/\*\*1\. EXECUTIVE SUMMARY\*\*\s*\n([\s\S]*?)(?=---|\*\*2\.)/);
-    const executiveSummary = execMatch ? execMatch[1].trim() : '';
-
-    const bgMatch = rawContent.match(/\*\*2\.1 Project Background\*\*\s*\n([\s\S]*?)(?=\*\*2\.2)/);
-    const projectBackground = bgMatch ? bgMatch[1].trim() : '';
-
-    const purposeMatch = rawContent.match(/\*\*Purpose:\*\*\s*\n([\s\S]*?)(?=\*\*Objectives:)/);
-    const projectPurpose = purposeMatch ? purposeMatch[1].trim() : '';
-
-    const objMatch = rawContent.match(/\*\*Objectives:\*\*\s*\n([\s\S]*?)(?=\*\*2\.3)/);
-    const objectives = objMatch ? objMatch[1].split('\n').filter(l => l.trim().startsWith('-')).map(l => l.replace(/^-\s*/, '').trim()) : [];
-
-    const stakeholderMatch = rawContent.match(/\*\*2\.3 Project Stakeholders\*\*\s*\n([\s\S]*?)(?=---|\*\*3\.)/);
-    const stakeholders: { role: string; name: string }[] = [];
-    if (stakeholderMatch) {
-      const lines = stakeholderMatch[1].split('\n').filter(l => l.trim().startsWith('-'));
-      lines.forEach(line => {
-        const match = line.match(/-\s*(.+?):\s*(.+)/);
-        if (match) {
-          stakeholders.push({ role: match[1].trim(), name: match[2].trim() });
-        }
-      });
-    }
-
-    const requirements: ParsedBRD['requirements'] = [];
-    const reqPattern = /\*\*3\.(\d) Requirement \d+: (.+?)\*\*\s*\n([\s\S]*?)(?=\*\*3\.\d Requirement|\*\*4\.)/g;
-    let reqMatch;
-    while ((reqMatch = reqPattern.exec(rawContent)) !== null) {
-      const reqContent = reqMatch[3];
-      const id = `3.${reqMatch[1]}`;
-      const title = reqMatch[2].trim();
-      
-      const bnMatch = reqContent.match(/\*\*3\.\d\.1 Business Need\*\*\s*\n([\s\S]*?)(?=\*\*3\.\d\.2)/);
-      const frMatch = reqContent.match(/\*\*3\.\d\.2 Functional Requirements\*\*\s*\n([\s\S]*?)(?=\*\*3\.\d\.3)/);
-      const nfrMatch = reqContent.match(/\*\*3\.\d\.3 Non-Functional Requirements\*\*\s*\n([\s\S]*?)(?=\*\*3\.\d\.4)/);
-      const acMatch = reqContent.match(/\*\*3\.\d\.4 Acceptance Criteria\*\*\s*\n([\s\S]*?)(?=---|$)/);
-
-      requirements.push({
-        id,
-        title,
-        businessNeed: bnMatch ? bnMatch[1].trim() : '',
-        functionalRequirements: frMatch ? frMatch[1].split('\n').filter(l => l.trim().startsWith('-')).map(l => l.replace(/^-\s*/, '').trim()) : [],
-        nonFunctionalRequirements: nfrMatch ? nfrMatch[1].split('\n').filter(l => l.trim().startsWith('-')).map(l => l.replace(/^-\s*/, '').trim()) : [],
-        acceptanceCriteria: acMatch ? acMatch[1].split('\n').filter(l => l.trim().startsWith('-')).map(l => l.replace(/^-\s*/, '').trim()) : [],
-      });
-    }
-
-    const assumpMatch = rawContent.match(/\*\*4\.1 Assumptions\*\*\s*\n([\s\S]*?)(?=\*\*4\.2)/);
-    const assumptions = assumpMatch ? assumpMatch[1].split('\n').filter(l => l.trim().startsWith('-')).map(l => l.replace(/^-\s*/, '').trim()) : [];
-
-    const depMatch = rawContent.match(/\*\*4\.2 Dependencies\*\*\s*\n([\s\S]*?)(?=\*\*4\.3)/);
-    const dependencies = depMatch ? depMatch[1].split('\n').filter(l => l.trim().startsWith('-')).map(l => l.replace(/^-\s*/, '').trim()) : [];
-
-    const constMatch = rawContent.match(/\*\*4\.3 Constraints\*\*\s*\n([\s\S]*?)(?=---|\*\*5\.)/);
-    const constraints = constMatch ? constMatch[1].split('\n').filter(l => l.trim().startsWith('-')).map(l => l.replace(/^-\s*/, '').trim()) : [];
-
-    const inScopeMatch = rawContent.match(/\*\*5\.1 In Scope\*\*\s*\n([\s\S]*?)(?=\*\*5\.2)/);
-    const inScope = inScopeMatch ? inScopeMatch[1].split('\n').filter(l => l.trim().startsWith('-')).map(l => l.replace(/^-\s*/, '').trim()) : [];
-
-    const outScopeMatch = rawContent.match(/\*\*5\.2 Out of Scope\*\*\s*\n([\s\S]*?)(?=---|\*\*6\.)/);
-    const outOfScope = outScopeMatch ? outScopeMatch[1].split('\n').filter(l => l.trim().startsWith('-')).map(l => l.replace(/^-\s*/, '').trim()) : [];
-
-    const currentState: { section: string; items: string[] }[] = [];
-    const currentStateMatch = rawContent.match(/\*\*6\.1 CURRENT STATE ANALYSIS\*\*\s*\n([\s\S]*?)(?=\*\*6\.2)/);
-    if (currentStateMatch) {
-      const sections = currentStateMatch[1].split(/\*\*([^*]+):\*\*/);
-      for (let i = 1; i < sections.length; i += 2) {
-        const sectionName = sections[i].trim();
-        const items = sections[i + 1]?.split('\n').filter(l => l.trim().startsWith('-')).map(l => l.replace(/^-\s*/, '').trim()) || [];
-        if (sectionName && items.length > 0) {
-          currentState.push({ section: sectionName, items });
-        }
-      }
-    }
-
-    const targetState: { section: string; items: string[] }[] = [];
-    const targetStateMatch = rawContent.match(/\*\*6\.2 TARGET STATE ANALYSIS\*\*\s*\n([\s\S]*?)(?=---|\*\*7\.)/);
-    if (targetStateMatch) {
-      const sections = targetStateMatch[1].split(/\*\*([^*]+):\*\*/);
-      for (let i = 1; i < sections.length; i += 2) {
-        const sectionName = sections[i].trim();
-        const items = sections[i + 1]?.split('\n').filter(l => l.trim().startsWith('-')).map(l => l.replace(/^-\s*/, '').trim()) || [];
-        if (sectionName && items.length > 0) {
-          targetState.push({ section: sectionName, items });
-        }
-      }
-    }
-
-    const definitions: { term: string; description: string }[] = [];
-    const defMatch = rawContent.match(/\| Term \| Description \|\s*\n\|[-|]+\|\s*\n([\s\S]*?)(?=\*\*Appendix II)/);
-    if (defMatch) {
-      const rows = defMatch[1].split('\n').filter(l => l.trim().startsWith('|'));
-      rows.forEach(row => {
-        const cells = row.split('|').filter(c => c.trim());
-        if (cells.length >= 2) {
-          definitions.push({ term: cells[0].trim(), description: cells[1].trim() });
-        }
-      });
-    }
-
-    const references: { title: string; location: string }[] = [];
-    const refMatch = rawContent.match(/\| Document Title \| Location \|\s*\n\|[-|]+\|\s*\n([\s\S]*?)(?=---|\*\*8\.)/);
-    if (refMatch) {
-      const rows = refMatch[1].split('\n').filter(l => l.trim().startsWith('|'));
-      rows.forEach(row => {
-        const cells = row.split('|').filter(c => c.trim());
-        if (cells.length >= 2) {
-          references.push({ title: cells[0].trim(), location: cells[1].trim() });
-        }
-      });
-    }
-
-    const signOff: { name: string; role: string }[] = [];
-    const signMatch = rawContent.match(/\| Name \| Signature \| Date \|\s*\n\|[-|]+\|\s*\n([\s\S]*?)(?=---|$)/);
-    if (signMatch) {
-      const rows = signMatch[1].split('\n').filter(l => l.trim().startsWith('|'));
-      rows.forEach(row => {
-        const cells = row.split('|').filter(c => c.trim());
-        if (cells.length >= 1 && cells[0].includes(':')) {
-          const parts = cells[0].split(':');
-          signOff.push({ role: parts[0].trim(), name: parts[1]?.trim() || '' });
-        }
-      });
-    }
-
-    return {
-      title: titleMatch?.[1]?.trim() || contextProject?.project_name || 'Untitled BRD',
-      version: versionMatch?.[1]?.trim() || '1.0',
-      date: dateMatch?.[1]?.trim() || new Date().toLocaleDateString(),
-      owner: ownerMatch?.[1]?.trim() || 'Unknown',
-      executiveSummary,
-      projectBackground,
-      projectPurpose,
-      objectives,
-      stakeholders,
-      requirements,
-      assumptions,
-      dependencies,
-      constraints,
-      inScope,
-      outOfScope,
-      currentState,
-      targetState,
-      definitions,
-      references,
-      signOff,
-    };
-  };
-
-  const handleDownloadWord = async () => {
-    if (!brdResponseData?.rawContent) {
-      toast.error("No BRD content available to download");
-      return;
-    }
-    
-    try {
-      const parsedBRD = parseBRDContentForWord(brdResponseData.rawContent);
-      await generateBRDWord(parsedBRD);
-      toast.success("BRD document downloaded successfully");
-    } catch (error) {
-      console.error("Error generating Word document:", error);
-      toast.error("Failed to generate Word document");
-    }
-  };
-
-  const canDownload = isBRDApproved && brdResponseData?.rawContent;
-
   return <div className="p-4 sm:p-6 lg:p-8 bg-white">
       <div className="mb-4 lg:mb-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={onBack} className="p-2 hover:bg-accent">
-              <ArrowLeft className="w-4 h-4" />
-            </Button>
-            <h1 className="text-xl font-bold sm:text-base">{contextProject?.project_name || "No Project Selected"}</h1>
-          </div>
-          <Button 
-            onClick={handleDownloadWord} 
-            disabled={!canDownload}
-            className="bg-primary hover:bg-primary/90"
-          >
-            <Download className="w-4 h-4 mr-2" />
-            Download BRD Response
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="sm" onClick={onBack} className="p-2 hover:bg-accent">
+            <ArrowLeft className="w-4 h-4" />
           </Button>
+          <h1 className="text-xl font-bold sm:text-base">{contextProject?.project_name || "No Project Selected"}</h1>
         </div>
       </div>
       
