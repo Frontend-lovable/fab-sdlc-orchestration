@@ -287,69 +287,93 @@ export const generateBRDWord = async (parsedBRD: ParsedBRD, logoBase64?: string)
     new Paragraph({ children: [new PageBreak()] }),
   ];
 
-  // Table of Contents placeholder
+  // Green color for TOC
+  const TOC_GREEN = "00A651";
+
+  // Helper function to create TOC entry with dot leaders
+  const createTocEntry = (
+    number: string,
+    title: string,
+    pageNum: string,
+    isMainSection: boolean = true,
+    indent: number = 0
+  ) => {
+    const dotLeader = "." + ".".repeat(80);
+    return new Paragraph({
+      children: [
+        new TextRun({
+          text: number,
+          bold: isMainSection,
+          italics: isMainSection,
+          size: 22,
+          font: "Arial",
+          color: TOC_GREEN,
+        }),
+        new TextRun({
+          text: "\t",
+          size: 22,
+        }),
+        new TextRun({
+          text: title,
+          bold: isMainSection,
+          italics: isMainSection,
+          size: 22,
+          font: "Arial",
+          color: TOC_GREEN,
+        }),
+        new TextRun({
+          text: dotLeader,
+          size: 22,
+          font: "Arial",
+          color: TOC_GREEN,
+        }),
+        new TextRun({
+          text: pageNum,
+          bold: isMainSection,
+          italics: isMainSection,
+          size: 22,
+          font: "Arial",
+          color: TOC_GREEN,
+        }),
+      ],
+      indent: { left: indent },
+      spacing: { after: 120 },
+      tabStops: [
+        { type: "right", position: 9000, leader: "dot" },
+      ],
+    });
+  };
+
+  // Table of Contents Section
   const tocSection = [
     new Paragraph({
-      text: "Table of Contents",
-      heading: HeadingLevel.HEADING_1,
-      spacing: { before: 400, after: 400 },
-    }),
-    new Paragraph({
+      alignment: AlignmentType.CENTER,
       children: [
-        new TextRun({ text: "1. Business Requirements", size: 22, font: "Arial" }),
-        new TextRun({ text: "\t\t\t\t\t\t\t\t\t\t\t\t1", size: 22, font: "Arial" }),
+        new TextRun({
+          text: "Table of Contents",
+          bold: true,
+          size: 32,
+          font: "Arial",
+          color: TOC_GREEN,
+        }),
       ],
-      spacing: { after: 100 },
+      spacing: { before: 400, after: 600 },
     }),
-    new Paragraph({
-      children: [
-        new TextRun({ text: "2. Executive Summary", size: 22, font: "Arial" }),
-        new TextRun({ text: "\t\t\t\t\t\t\t\t\t\t\t\t2", size: 22, font: "Arial" }),
-      ],
-      spacing: { after: 100 },
-    }),
-    new Paragraph({
-      children: [
-        new TextRun({ text: "3. Project Overview", size: 22, font: "Arial" }),
-        new TextRun({ text: "\t\t\t\t\t\t\t\t\t\t\t\t3", size: 22, font: "Arial" }),
-      ],
-      spacing: { after: 100 },
-    }),
-    new Paragraph({
-      children: [
-        new TextRun({ text: "4. Assumptions, Dependencies and Constraints", size: 22, font: "Arial" }),
-        new TextRun({ text: "\t\t\t\t\t4", size: 22, font: "Arial" }),
-      ],
-      spacing: { after: 100 },
-    }),
-    new Paragraph({
-      children: [
-        new TextRun({ text: "5. Project Scope", size: 22, font: "Arial" }),
-        new TextRun({ text: "\t\t\t\t\t\t\t\t\t\t\t\t5", size: 22, font: "Arial" }),
-      ],
-      spacing: { after: 100 },
-    }),
-    new Paragraph({
-      children: [
-        new TextRun({ text: "6. Current and Target State Analysis", size: 22, font: "Arial" }),
-        new TextRun({ text: "\t\t\t\t\t\t\t6", size: 22, font: "Arial" }),
-      ],
-      spacing: { after: 100 },
-    }),
-    new Paragraph({
-      children: [
-        new TextRun({ text: "7. Appendices", size: 22, font: "Arial" }),
-        new TextRun({ text: "\t\t\t\t\t\t\t\t\t\t\t\t\t7", size: 22, font: "Arial" }),
-      ],
-      spacing: { after: 100 },
-    }),
-    new Paragraph({
-      children: [
-        new TextRun({ text: "8. Sign Off / Acknowledgement", size: 22, font: "Arial" }),
-        new TextRun({ text: "\t\t\t\t\t\t\t\t\t8", size: 22, font: "Arial" }),
-      ],
-      spacing: { after: 100 },
-    }),
+    // Main sections
+    createTocEntry("1", "Business Requirements", "1"),
+    createTocEntry("2", "Purpose", "2"),
+    createTocEntry("3", "Overview", "3"),
+    createTocEntry("3.1", "Requesting Line of Business", "3", false, 720),
+    createTocEntry("3.2", "Stakeholders", "3", false, 720),
+    createTocEntry("3.3", "Description", "4", false, 720),
+    createTocEntry("3.4", "Assumptions", "4", false, 720),
+    createTocEntry("3.5", "Dependencies", "4", false, 720),
+    createTocEntry("4", ". Scope", "6"),
+    createTocEntry("5", "Current and Target State Analysis", "7"),
+    createTocEntry("6", "Appendices", "8"),
+    createTocEntry("6.1", "Appendix I -Definitions, Acronyms, and Abbreviations", "8", false, 720),
+    createTocEntry("6.2", "Appendix II –Reference Material", "8", false, 720),
+    createTocEntry("7", "Approvals & Acknowledgments", "9"),
     new Paragraph({ children: [new PageBreak()] }),
   ];
 
